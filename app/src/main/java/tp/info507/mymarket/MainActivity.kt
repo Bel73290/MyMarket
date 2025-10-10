@@ -48,7 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import tp.info507.mymarket.ui.theme.MyMarketTheme
+import td.info507.mymarket.ui.theme.MyMarketTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyMarketTheme {
-                 ListeEvenement()
+                ListeEvenement()
             }
         }
     }
@@ -82,8 +83,7 @@ fun ListeEvenement() {
             val text = remember {
                 mutableStateOf("")
             }
-            OutlinedTextField(//test
-
+            OutlinedTextField(
                 modifier = Modifier
                     .padding(start = 20.dp)
                     .weight(0.90f)
@@ -118,7 +118,7 @@ fun ListeEvenement() {
             IconButton(
                 onClick = { isVisible_CourseT = !isVisible_CourseT },
 
-            ) {
+                ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
@@ -134,7 +134,7 @@ fun ListeEvenement() {
             ) {
                 Button(
                     modifier = Modifier
-                    .fillMaxWidth(),
+                        .fillMaxWidth(),
 
                     onClick = {
                         isVisible_CourseT = !isVisible_CourseT
@@ -187,12 +187,12 @@ fun ListeEvenement() {
             ) {
                 Button(
                     modifier = Modifier
-                    .fillMaxWidth(),
+                        .fillMaxWidth(),
 
 
                     onClick = { isVisible = !isVisible },
-                            colors = ButtonDefaults.buttonColors(Color(0xFFD9D9D9),
-                                contentColor = Color.Black    )
+                    colors = ButtonDefaults.buttonColors(Color(0xFFD9D9D9),
+                        contentColor = Color.Black    )
 
 
                 ) {
@@ -292,19 +292,19 @@ fun Dialogue(showDialog: MutableState<Boolean>){
             },
 
 
-                dismissButton = {
-                    Button(onClick = { showDialog.value = false }) {
-                        Text("Annuler")
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        modifier = Modifier,
-                        onClick = { showDialog.value = false }
-                    ) {
-                        Text("Valider")
-                    }
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("Annuler")
                 }
+            },
+            confirmButton = {
+                Button(
+                    modifier = Modifier,
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Valider")
+                }
+            }
 
         )
     }

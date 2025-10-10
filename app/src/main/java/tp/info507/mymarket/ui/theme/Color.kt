@@ -1,4 +1,4 @@
-package tp.info507.mymarket.ui.theme
+package td.info507.mymarket.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
