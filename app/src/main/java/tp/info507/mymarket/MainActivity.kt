@@ -1,6 +1,5 @@
 package tp.info507.mymarket
 
-import android.R.attr.start
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,20 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -40,15 +33,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import td.info507.mymarket.ui.theme.MyMarketTheme
+import td.info507.mymarket.storage.CourseDataBaseStorage
+
+
 
 
 class MainActivity : ComponentActivity() {
@@ -180,30 +175,46 @@ fun ListeEvenement() {
         }
 
         if (isVisible) {
+            val context = LocalContext.current
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
-                    .padding(end = 15.dp)
+                    .padding(end = 15.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+
             ) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                val courses = CourseDataBaseStorage(context).getCourses()
+                for (course in courses) {
+                    Button(
+                        modifier = Modifier
+
+                            .fillMaxWidth(),
 
 
-                    onClick = { isVisible = !isVisible },
-                    colors = ButtonDefaults.buttonColors(Color(0xFFD9D9D9),
-                        contentColor = Color.Black    )
+                        onClick = { isVisible = !isVisible },
+                        colors = ButtonDefaults.buttonColors(
+                            Color(0xFFD9D9D9),
+                            contentColor = Color.Black
+                        )
 
 
-                ) {
-                    Column() {
-                        Text("Nom: Course 1")
-                        Text("Nombre d'articles: 50")
+                    ) {
+
+                        Column() {
+                            Text("Nom: ${course.nom}")
+                            Text("Nombre d'articles: ${course.id}")
+                        }
+                        Column(modifier = Modifier.padding(start = 56.dp)) {
+                            Text("Budgets Final: ${course.prix_initial}$")
+
+                        }
+
                     }
-                    Column(modifier = Modifier.padding(start = 56.dp)) {
-                        Text("Budgets Final: 100$")
 
-                    }
+
+
+
+
                 }
             }
         }
@@ -260,9 +271,10 @@ fun ListeEvenement() {
 
 @Composable
 fun Dialogue(showDialog: MutableState<Boolean>){
-    var Nom by remember { mutableStateOf("") }
-    var Magasin by remember { mutableStateOf("") }
-    var Budget by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var NomText by remember { mutableStateOf("") }
+    var MagasinText by remember { mutableStateOf("") }
+    var BudgetText by remember { mutableStateOf("") }
 
     if (showDialog.value) {
         AlertDialog(
@@ -270,9 +282,7 @@ fun Dialogue(showDialog: MutableState<Boolean>){
             title = { Text("Ajouter une liste") },
             text = {
                 Column {
-                    var NomText by remember { mutableStateOf(Nom) }
-                    var MagasinText by remember { mutableStateOf(Magasin) }
-                    var BudgetText by remember { mutableStateOf(Budget) }
+
                     OutlinedTextField(
                         value = NomText,
                         onValueChange = { NomText = it },
@@ -288,6 +298,8 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                         onValueChange = { BudgetText = it },
                         label = { Text("Bugdget") }
                     )
+
+
                 }
             },
 
@@ -299,8 +311,19 @@ fun Dialogue(showDialog: MutableState<Boolean>){
             },
             confirmButton = {
                 Button(
-                    modifier = Modifier,
-                    onClick = { showDialog.value = false }
+                    onClick = {
+                        val budgetInt: Int? = BudgetText.toIntOrNull()
+
+                        val storage = CourseDataBaseStorage(context)
+                        storage.insertCourse(
+                            nom = NomText,
+                            date = "2025-10-10",
+                            prix = budgetInt,
+                            lieu = MagasinText,
+                            etat = false
+                        )
+                        showDialog.value = false
+                    }
                 ) {
                     Text("Valider")
                 }
