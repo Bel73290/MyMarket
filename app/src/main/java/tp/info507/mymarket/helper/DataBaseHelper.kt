@@ -7,7 +7,7 @@ import android.provider.BaseColumns
 import td.info507.mymarket.modele.Article
 import td.info507.mymarket.modele.Course
 
-class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, "mymarket.db", null, 1) {
+class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, "mymarket2.db", null, 1) {
 
 
         override fun onCreate(db: SQLiteDatabase) {
@@ -18,7 +18,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, "mymarket.db"
                         "${Course.NOM} TEXT," +
                         "${Course.DATE} TEXT," +
                         "${Course.PRIX_INITIAL} INTEGER," +
-                        "${Course.LIEU} TEXT," +
+                        "${Course.PRIX_FINAL} INTEGER," +
                         "${Course.ETAT} BOOLEAN," +
                         "PRIMARY KEY(${BaseColumns._ID})" +
                         ")"

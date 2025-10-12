@@ -10,13 +10,13 @@ class CourseDataBaseStorage(context: Context) {
 
     private val dbHelper = DataBaseHelper(context)
 
-    fun insertCourse(nom: String, date: String, prix: Int?, lieu: String, etat: Boolean): Long {
+    fun insertCourse(nom: String, date: String, prix: Int?, prix_final: Int?, etat: Boolean): Long {
         val db = dbHelper.writableDatabase
         val values = ContentValues().apply {
             put(Course.NOM, nom)
             put(Course.DATE, date)
             put(Course.PRIX_INITIAL, prix)
-            put(Course.LIEU, lieu)
+            put(Course.PRIX_FINAL, prix_final)
             put(Course.ETAT, etat)
         }
 
@@ -33,11 +33,11 @@ class CourseDataBaseStorage(context: Context) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID))
                 val nom = cursor.getString(cursor.getColumnIndexOrThrow(Course.NOM))
                 val date = cursor.getString(cursor.getColumnIndexOrThrow(Course.DATE))
-                val prixInitial = cursor.getInt(cursor.getColumnIndexOrThrow(Course.PRIX_INITIAL))
-                val lieu = cursor.getString(cursor.getColumnIndexOrThrow(Course.LIEU))
+                val prixInitial = cursor.getInt(cursor.getColumnIndexOrThrow(Course.PRIX_FINAL))
+                val prixFinal = cursor.getInt(cursor.getColumnIndexOrThrow(Course.PRIX_FINAL))
                 val etat = cursor.getInt(cursor.getColumnIndexOrThrow(Course.ETAT)) > 0
 
-                val course = Course(id, nom, date, prixInitial, lieu, etat)
+                val course = Course(id, nom, date, prixInitial, prixFinal, etat)
                 courses.add(course)
             } while (cursor.moveToNext())
         }

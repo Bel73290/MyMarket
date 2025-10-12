@@ -5,7 +5,7 @@ data class Course(
     val nom: String,
     val date: String,
     val prix_initial: Int,
-    val lieu: String,
+    val prix_final: Int,
     val etat: Boolean
 ) {
     companion object {
@@ -13,7 +13,7 @@ data class Course(
         const val NOM = "nom"
         const val DATE = "date"
         const val PRIX_INITIAL = "prix_initial"
-        const val LIEU = "lieu"
+        const val PRIX_FINAL = "prix_final"
         const val ETAT = "etat"
     }
 }

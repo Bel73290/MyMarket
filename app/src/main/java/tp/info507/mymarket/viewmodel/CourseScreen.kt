@@ -1,18 +1,50 @@
-//package td.info507.mymarket.ui
-//
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyColumn
-//import androidx.compose.foundation.lazy.itemsIndexed
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import td.info507.mymarket.modele.Article
+package td.info507.mymarket.ui
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import td.info507.mymarket.modele.Article
+import td.info507.mymarket.ui.theme.MyMarketTheme
+import tp.info507.mymarket.ListeEvenement
+import tp.info507.mymarket.MainActivity
+
 //import td.info507.mymarket.viewmodel.CourseViewModel
-//
+
+
+
+class CourseScreen : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MyMarketTheme {
+                Hello()
+            }
+        }
+    }
+}
+@Composable
+fun Hello() {
+    Text("TEST PAGE")
+}
+
+
+
+
 //@Composable
 //fun CourseScreen(viewModel: CourseViewModel) {
 //    val course = viewModel.course.value ?: run {

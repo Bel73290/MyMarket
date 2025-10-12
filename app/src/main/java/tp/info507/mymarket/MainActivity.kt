@@ -1,6 +1,7 @@
 package tp.info507.mymarket
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,9 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.viewModelFactory
 import td.info507.mymarket.ui.theme.MyMarketTheme
 import td.info507.mymarket.storage.CourseDataBaseStorage
-
+import td.info507.mymarket.ui.CourseScreen
+import tp.info507.mymarket.viewmodel.CourseLScreen
 
 
 
@@ -61,6 +65,7 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("RememberReturnType")
 @Composable
 fun ListeEvenement() {
+    val context = LocalContext.current
     Column() {
         Row(
             modifier = Modifier
@@ -127,16 +132,14 @@ fun ListeEvenement() {
                     .padding(start = 15.dp)
                     .padding(end = 15.dp)
             ) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-
-                    onClick = {
-                        isVisible_CourseT = !isVisible_CourseT
-                    },
-                    colors = ButtonDefaults.buttonColors(Color(0xFFD9D9D9),
-                        contentColor = Color.Black    )
-                ) {
+                Button(modifier = Modifier
+                        .fillMaxWidth(), onClick = {
+                        val intent = Intent(context, CourseLScreen::class.java)
+                        context.startActivity(intent)
+                    }, colors = ButtonDefaults.buttonColors(
+                        Color(0xFFD9D9D9),
+                        contentColor = Color.Black
+                    )) {
                     Column() {
                         Text("Nom: Course 1")
                         Text("Nombre d'articles: 50")
@@ -163,7 +166,7 @@ fun ListeEvenement() {
 
 
             IconButton(
-                onClick = { isVisible = !isVisible } // change l'état à chaque clic
+                onClick = { isVisible = !isVisible }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
@@ -191,7 +194,7 @@ fun ListeEvenement() {
                             .fillMaxWidth(),
 
 
-                        onClick = { isVisible = !isVisible },
+                        onClick = { },
                         colors = ButtonDefaults.buttonColors(
                             Color(0xFFD9D9D9),
                             contentColor = Color.Black
@@ -305,12 +308,20 @@ fun Dialogue(showDialog: MutableState<Boolean>){
 
 
             dismissButton = {
-                Button(onClick = { showDialog.value = false }) {
+                Button(modifier=Modifier
+                    .fillMaxWidth(),
+                    onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(
+                        Color(0xFFFFFFFF),
+                        contentColor = Color.Black
+                    )) {
                     Text("Annuler")
                 }
             },
             confirmButton = {
                 Button(
+                    modifier=Modifier
+                        .fillMaxWidth(),
                     onClick = {
                         val budgetInt: Int? = BudgetText.toIntOrNull()
 
@@ -319,11 +330,15 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                             nom = NomText,
                             date = "2025-10-10",
                             prix = budgetInt,
-                            lieu = MagasinText,
+                            prix_final = 0,
                             etat = false
                         )
                         showDialog.value = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        Color(0xFF000000),
+                        contentColor = Color.White
+                    )
                 ) {
                     Text("Valider")
                 }
