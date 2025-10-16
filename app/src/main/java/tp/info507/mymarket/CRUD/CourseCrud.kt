@@ -9,7 +9,7 @@ import td.info507.mymarket.modele.Course
 class CourseCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
 
-    fun createCourse(nom: String, date: String, prixInitial: Int, lieu: String): Long {
+    fun createCourse(nom: String, date: String, prixInitial: Int): Long {
         val v = ContentValues().apply {
             put(Course.NOM, nom)
             put(Course.DATE, date)
