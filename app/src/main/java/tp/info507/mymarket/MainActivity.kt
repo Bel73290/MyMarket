@@ -11,12 +11,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -42,10 +43,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.viewModelFactory
+import td.info507.mymarket.crud.CourseCrud
 import td.info507.mymarket.ui.theme.MyMarketTheme
-import td.info507.mymarket.storage.CourseDataBaseStorage
-import td.info507.mymarket.ui.CourseScreen
+
 import tp.info507.mymarket.viewmodel.CourseLScreen
 
 
@@ -66,7 +66,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ListeEvenement() {
     val context = LocalContext.current
-    Column() {
+    Column(modifier= Modifier
+        .verticalScroll(rememberScrollState())) {
         Row(
             modifier = Modifier
                 .padding(top = 45.dp)
@@ -130,24 +131,39 @@ fun ListeEvenement() {
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
-                    .padding(end = 15.dp)
+                    .padding(end = 15.dp),
+
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Button(modifier = Modifier
-                        .fillMaxWidth(), onClick = {
-                        val intent = Intent(context, CourseLScreen::class.java)
-                        context.startActivity(intent)
-                    }, colors = ButtonDefaults.buttonColors(
-                        Color(0xFFD9D9D9),
-                        contentColor = Color.Black
-                    )) {
-                    Column() {
-                        Text("Nom: Course 1")
-                        Text("Nombre d'articles: 50")
-                    }
-                    Column(modifier = Modifier.padding(start = 56.dp)) {
-                        Text("Budgets Final: 100$")
+                val courses = CourseCrud(context).getAll()
+                for (course in courses) {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        onClick = {
+                            val intent = Intent(context, CourseLScreen::class.java)
+                            context.startActivity(intent)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            Color(0xFFD9D9D9),
+                            contentColor = Color.Black
+                        )
+
+
+                    ) {
+
+                        Column() {
+                            Text("Nom: ${course.nom}")
+                            Text("Nombre d'articles: ${course.id}")
+                        }
+                        Column(modifier = Modifier.padding(start = 56.dp)) {
+                            Text("Budgets Final: ${course.prix_initial}$")
+
+                        }
 
                     }
+
+
                 }
             }
         }
@@ -178,72 +194,56 @@ fun ListeEvenement() {
         }
 
         if (isVisible) {
-            val context = LocalContext.current
+
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .padding(end = 15.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+
+                verticalArrangement = Arrangement.spacedBy(16.dp)
 
             ) {
-                val courses = CourseDataBaseStorage(context).getCourses()
-                for (course in courses) {
-                    Button(
-                        modifier = Modifier
-
-                            .fillMaxWidth(),
-
-
-                        onClick = { },
-                        colors = ButtonDefaults.buttonColors(
-                            Color(0xFFD9D9D9),
-                            contentColor = Color.Black
-                        )
-
-
-                    ) {
-
-                        Column() {
-                            Text("Nom: ${course.nom}")
-                            Text("Nombre d'articles: ${course.id}")
-                        }
-                        Column(modifier = Modifier.padding(start = 56.dp)) {
-                            Text("Budgets Final: ${course.prix_initial}$")
-
-                        }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(), onClick = {
+                        val intent = Intent(context, CourseLScreen::class.java)
+                        context.startActivity(intent)
+                    }, colors = ButtonDefaults.buttonColors(
+                        Color(0xFFD9D9D9),
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Column() {
+                        Text("Nom: Course 1")
+                        Text("Nombre d'articles: 50")
+                    }
+                    Column(modifier = Modifier.padding(start = 56.dp)) {
+                        Text("Budgets Final: 100$")
 
                     }
-
-
-
-
-
                 }
+
             }
         }
-
+    }
         val showDialog2 = remember { mutableStateOf(false)}
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(6.dp),
+                .padding(6.dp)
+                ,
             verticalArrangement = Arrangement.Bottom,
 
             ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+
+                    .background(Color.White),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+
 
             ) {
-                IconButton(onClick = { }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_map),
-                        contentDescription = "Map",
-                        tint = Color.Black,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+
                 IconButton(onClick = {
                     showDialog2.value = true
                 }) {
@@ -254,29 +254,22 @@ fun ListeEvenement() {
                         modifier = Modifier.size(45.dp)
                     )
                 }
-                IconButton(onClick = { }) {
-                    Icon(
 
-                        painter = painterResource(R.drawable.ic_cloche),
-                        contentDescription = "Galerie",
-                        tint = Color.Black,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
             }
             Dialogue(showDialog2)
         }
 
     }
 
-}
+
+
 
 
 @Composable
 fun Dialogue(showDialog: MutableState<Boolean>){
     val context = LocalContext.current
     var NomText by remember { mutableStateOf("") }
-    var MagasinText by remember { mutableStateOf("") }
+    var DateText by remember { mutableStateOf("") }
     var BudgetText by remember { mutableStateOf("") }
 
     if (showDialog.value) {
@@ -292,9 +285,9 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                         label = { Text("Nom") }
                     )
                     OutlinedTextField(
-                        value = MagasinText,
-                        onValueChange = { MagasinText = it },
-                        label = { Text("Magasin") }
+                        value = DateText,
+                        onValueChange = { DateText = it },
+                        label = { Text("Date") }
                     )
                     OutlinedTextField(
                         value = BudgetText,
@@ -325,14 +318,8 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                     onClick = {
                         val budgetInt: Int? = BudgetText.toIntOrNull()
 
-                        val storage = CourseDataBaseStorage(context)
-                        storage.insertCourse(
-                            nom = NomText,
-                            date = "2025-10-10",
-                            prix = budgetInt,
-                            prix_final = 0,
-                            etat = false
-                        )
+                        val storage = CourseCrud(context)
+                        storage.insert(storage.createCourse(NomText, "2025-10-10", 20))
                         showDialog.value = false
                     },
                     colors = ButtonDefaults.buttonColors(

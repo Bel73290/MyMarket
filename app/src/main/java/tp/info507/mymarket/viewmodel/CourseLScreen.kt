@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -64,7 +68,7 @@ fun Test2() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    modifier = Modifier.padding(start = 18.dp),
+                    modifier = Modifier.padding(start = 0.dp),
                     onClick = {
                         val intent = Intent(context, MainActivity::class.java)
                         context.startActivity(intent)
@@ -94,12 +98,14 @@ fun Test2() {
                 Box(
                     modifier = Modifier
                         .size(30.dp)
-                        //.background(Color.Green, shape = RoundedCornerShape(6.dp))
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(6.dp))
+                        .background(Color.Green, shape = RoundedCornerShape(6.dp))
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.Center
                 ){
                     Text(
-                        text = "X",
+                        text = "✓",
                         color = Color.White,
+
 
                     )
                 }
@@ -108,25 +114,69 @@ fun Test2() {
 
                 Text("Café", modifier=Modifier.padding(top = 3.dp))
 
-                Spacer(modifier = Modifier.width(250.dp))
+                Spacer(modifier = Modifier
+                    .weight(1f)
+                   ,
+                    )
 
 
                 Box(
                     modifier = Modifier
-                        .size(70.dp,40.dp)
-                        .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                        .size(80.dp,40.dp)
+                        .padding(end = 16.dp)
+                        .background(Color.Gray, shape = RoundedCornerShape(25.dp))
+                        ,
+
                     contentAlignment = Alignment.Center
+
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize(0.8f)
                             .background(Color.White, shape = RoundedCornerShape(25.dp))
-                            .padding(4.dp) // un peu de padding pour le TextField
+                            .padding(4.dp)
                     ) {
 
                     }
                 }
             }
+        }
+
+
+        Column (modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
+
+        ){
+            IconButton(modifier = Modifier
+                    .wrapContentSize(Alignment.Center),
+                    onClick = {},
+                ) {
+                Icon(
+
+                    painter = painterResource(R.drawable.baseline_add_circle_24),
+                    contentDescription = "add",
+                    tint = Color(0xFFD9D9D9),
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp),
+                onClick = {},
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF000000),
+                    contentColor = Color.Black
+                )
+            ) {
+                Text(
+                    text = "Terminer Course",
+                    color = Color.White
+                )
+            }
+
         }
     }
 }
