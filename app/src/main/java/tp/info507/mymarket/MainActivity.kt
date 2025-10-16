@@ -316,10 +316,10 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                     modifier=Modifier
                         .fillMaxWidth(),
                     onClick = {
-                        val budgetInt: Int? = BudgetText.toIntOrNull()
-
+                        val budgetInt: Int = BudgetText.toIntOrNull() ?: 0 // valeur par défaut si vide
                         val storage = CourseCrud(context)
-                        storage.createCourse(NomText, "2025-10-10", 20)
+                        storage.createCourse(NomText, DateText.ifEmpty { "2025-10-10" }, budgetInt)
+
                         showDialog.value = false
                     },
                     colors = ButtonDefaults.buttonColors(
