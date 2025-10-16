@@ -2,7 +2,6 @@ package td.info507.mymarket.crud
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import td.info507.mymarket.helper.DataBaseHelper
 import td.info507.mymarket.modele.Course
 
@@ -22,7 +21,7 @@ class CourseCrud(context: Context) {
         return res
     }
 
-    fun insert(c: Course): Long {
+    fun insert(c: Long): Long {
         val v = ContentValues().apply {
             put(Course.ID, c.id)
             put(Course.NOM, c.nom)
