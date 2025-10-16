@@ -2,14 +2,24 @@ package td.info507.mymarket.crud
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import td.info507.mymarket.helper.DataBaseHelper
 import td.info507.mymarket.modele.Course
 
 class CourseCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
 
-    fun create(id: Int, obj: Course): Course {
-        return Course(id, obj.nom, obj.date, obj.prix_initial,obj.etat )
+    fun createCourse(nom: String, date: String, prixInitial: Int, lieu: String): Long {
+        val v = ContentValues().apply {
+            put(Course.NOM, nom)
+            put(Course.DATE, date)
+            put(Course.PRIX_INITIAL, prixInitial)
+            put(Course.ETAT, 0)
+        }
+
+        val db = dbh.writableDatabase
+        val res = db.insert(Course.TABLE, null, v)
+        return res
     }
 
     fun insert(c: Course): Long {
