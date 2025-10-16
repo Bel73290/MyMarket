@@ -21,18 +21,6 @@ class CourseCrud(context: Context) {
         return res
     }
 
-    fun insert(c: Course): Long {
-        val v = ContentValues().apply {
-            put(Course.ID, c.id)
-            put(Course.NOM, c.nom)
-            put(Course.DATE, c.date)
-            put(Course.PRIX_INITIAL, c.prix_initial)
-            put(Course.ETAT, if (c.etat) 1 else 0)
-        }
-        val res = dbh.writableDatabase.insert(Course.TABLE, null, v)
-        return res
-    }
-
     fun update(c: Course): Int {
         val v = ContentValues().apply {
             put(Course.NOM, c.nom)
