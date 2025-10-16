@@ -319,7 +319,7 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                         val budgetInt: Int? = BudgetText.toIntOrNull()
 
                         val storage = CourseCrud(context)
-                        storage.insert(storage.createCourse(NomText, "2025-10-10", 20))
+                        storage.createCourse(NomText, "2025-10-10", 20)
                         showDialog.value = false
                     },
                     colors = ButtonDefaults.buttonColors(

@@ -21,7 +21,7 @@ class CourseCrud(context: Context) {
         return res
     }
 
-    fun insert(c: Long): Long {
+    fun insert(c: Course): Long {
         val v = ContentValues().apply {
             put(Course.ID, c.id)
             put(Course.NOM, c.nom)
