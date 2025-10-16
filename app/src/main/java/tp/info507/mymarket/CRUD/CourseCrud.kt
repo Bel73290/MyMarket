@@ -16,8 +16,7 @@ class CourseCrud(context: Context) {
             put(Course.ETAT, 0)
         }
 
-        val db = dbh.writableDatabase
-        val res = db.insert(Course.TABLE, null, v)
+        val res = dbh.writableDatabase.insert(Course.TABLE, null, v)
         return res
     }
 
@@ -28,28 +27,23 @@ class CourseCrud(context: Context) {
             put(Course.PRIX_INITIAL, c.prix_initial)
             put(Course.ETAT, if (c.etat) 1 else 0)
         }
-        val rows = dbh.writableDatabase.update(
-            Course.TABLE, v, "${Course.ID}=?", arrayOf(c.id.toString())
-        )
-        return rows
+        val res = dbh.writableDatabase.update(Course.TABLE, v, "${Course.ID}=?", arrayOf(c.id.toString()))
+        return res
     }
 
     fun delete(id: Int): Int {
-        val rows = dbh.writableDatabase.delete(
-            Course.TABLE, "${Course.ID}=?", arrayOf(id.toString())
-        )
-        return rows
+        val res = dbh.writableDatabase.delete(Course.TABLE, "${Course.ID}=?", arrayOf(id.toString()))
+        return res
     }
 
     fun getById(id: Int): Course? {
-        val db = dbh.readableDatabase
-        var result: Course? = null
-        db.query(
+        var res: Course? = null
+        dbh.readableDatabase.query(
             Course.TABLE, null,
             "${Course.ID}=?", arrayOf(id.toString()), null, null, null
         ).use { c ->
             if (c.moveToFirst()) {
-                result = Course(
+                res = Course(
                     id = c.getInt(c.getColumnIndexOrThrow(Course.ID)),
                     nom = c.getString(c.getColumnIndexOrThrow(Course.NOM)),
                     date = c.getString(c.getColumnIndexOrThrow(Course.DATE)),
@@ -58,15 +52,14 @@ class CourseCrud(context: Context) {
                 )
             }
         }
-        return result
+        return res
     }
 
     fun getAll(): List<Course> {
-        val db = dbh.readableDatabase
-        val out = mutableListOf<Course>()
-        db.query(Course.TABLE, null, null, null, null, null, "${Course.ID} DESC").use { c ->
+        val res = mutableListOf<Course>()
+        dbh.readableDatabase.query(Course.TABLE, null, null, null, null, null, "${Course.ID} DESC").use { c ->
             while (c.moveToNext()) {
-                out += Course(
+                res += Course(
                     id = c.getInt(c.getColumnIndexOrThrow(Course.ID)),
                     nom = c.getString(c.getColumnIndexOrThrow(Course.NOM)),
                     date = c.getString(c.getColumnIndexOrThrow(Course.DATE)),
@@ -75,14 +68,12 @@ class CourseCrud(context: Context) {
                 )
             }
         }
-        return out
+        return res
     }
 
     fun setEtat(id: Int, finished: Boolean): Int {
         val v = ContentValues().apply { put(Course.ETAT, if (finished) 1 else 0) }
-        val rows = dbh.writableDatabase.update(
-            Course.TABLE, v, "${Course.ID}=?", arrayOf(id.toString())
-        )
-        return rows
+        val res = dbh.writableDatabase.update(Course.TABLE, v, "${Course.ID}=?", arrayOf(id.toString()))
+        return res
     }
 }

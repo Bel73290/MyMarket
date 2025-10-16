@@ -35,22 +35,21 @@ class CourseArticleCrud(context: Context) {
     /** Met à jour le prix final d’un article de la course. */
     fun setFinalPrice(courseId: Int, articleId: Int, price: Int): Int {
         val v = ContentValues().apply { put(CourseArticle.PRICE_FINAL, price) }
-        val rows = dbh.writableDatabase.update(
+        val res = dbh.writableDatabase.update(
             CourseArticle.TABLE, v,
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
             arrayOf(courseId.toString(), articleId.toString())
         )
-        return rows
+        return res
     }
 
     /** Coche/décoche. Si on coche et price_final == 0 → price_final = price_estime. */
     fun toggleChecked(courseId: Int, articleId: Int): Int {
-        val db = dbh.writableDatabase
 
         var curChecked = 0
         var curFinal = 0
         var curEstime = 0
-        db.query(
+        dbh.writableDatabase.query(
             CourseArticle.TABLE,
             arrayOf(CourseArticle.CHECKED, CourseArticle.PRICE_FINAL, CourseArticle.PRICE_ESTIME),
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
@@ -66,7 +65,7 @@ class CourseArticleCrud(context: Context) {
 
         val newChecked = if (curChecked == 1) 0 else 1
         val v = ContentValues().apply { put(CourseArticle.CHECKED, newChecked) }
-        val rows = db.update(
+        val res = dbh.writableDatabase.update(
             CourseArticle.TABLE, v,
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
             arrayOf(courseId.toString(), articleId.toString())
@@ -74,23 +73,23 @@ class CourseArticleCrud(context: Context) {
 
         if (newChecked == 1 && curFinal == 0) {
             val v2 = ContentValues().apply { put(CourseArticle.PRICE_FINAL, curEstime) }
-            db.update(
+            dbh.writableDatabase.update(
                 CourseArticle.TABLE, v2,
                 "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
                 arrayOf(courseId.toString(), articleId.toString())
             )
         }
-        return rows
+        return res
     }
 
     /** Supprime une ligne (un article) de la course. */
     fun removeItem(courseId: Int, articleId: Int): Int {
-        val rows = dbh.writableDatabase.delete(
+        val res = dbh.writableDatabase.delete(
             CourseArticle.TABLE,
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
             arrayOf(courseId.toString(), articleId.toString())
         )
-        return rows
+        return res
     }
 
     /**
@@ -111,7 +110,7 @@ class CourseArticleCrud(context: Context) {
             ORDER BY a.${Article.NAME} ASC
         """.trimIndent()
 
-        val out = mutableListOf<Pair<CourseArticle, String>>()
+        val res = mutableListOf<Pair<CourseArticle, String>>()
         dbh.readableDatabase.rawQuery(sql, arrayOf(courseId.toString())).use { c ->
             while (c.moveToNext()) {
                 val item = CourseArticle(
@@ -122,52 +121,51 @@ class CourseArticleCrud(context: Context) {
                     checked      = c.getInt(c.getColumnIndexOrThrow(CourseArticle.CHECKED)) == 1
                 )
                 val articleName = c.getString(c.getColumnIndexOrThrow("name"))
-                out += Pair(item, articleName)
+                res += Pair(item, articleName)
             }
         }
-        return out
+        return res
     }
 
     /** Total courant: somme des price_final des lignes COCHÉES. */
     fun budgetFinalDuring(courseId: Int): Int {
         val sql = "SELECT IFNULL(SUM(${CourseArticle.PRICE_FINAL}),0) FROM ${CourseArticle.TABLE} WHERE ${CourseArticle.COURSE_ID}=? AND ${CourseArticle.CHECKED}=1"
-        var total = 0
+        var res = 0
         dbh.readableDatabase.rawQuery(sql, arrayOf(courseId.toString())).use { c ->
             if (c.moveToFirst()) {
-                total = c.getInt(0)
+                res = c.getInt(0)
             }
         }
-        return total
+        return res
     }
 
     /** Total final après validation (toutes les lignes, les non cochées seront mises à 0 par finishCourse). */
     fun budgetFinalAfter(courseId: Int): Int {
         val sql = "SELECT IFNULL(SUM(${CourseArticle.PRICE_FINAL}),0) FROM ${CourseArticle.TABLE} WHERE ${CourseArticle.COURSE_ID}=?"
-        var total = 0
+        var res = 0
         dbh.readableDatabase.rawQuery(sql, arrayOf(courseId.toString())).use { c ->
             if (c.moveToFirst()) {
-                total = c.getInt(0)
+                res = c.getInt(0)
             }
         }
-        return total
+        return res
     }
 
     /** Termine la course : met price_final=0 pour les non cochés, puis etat=1 sur Course. */
     fun finishCourse(courseId: Int) {
-        val db = dbh.writableDatabase
-        db.beginTransaction()
+        dbh.writableDatabase.beginTransaction()
         try {
             val v = ContentValues().apply { put(CourseArticle.PRICE_FINAL, 0) }
-            db.update(
+            dbh.writableDatabase.update(
                 CourseArticle.TABLE, v,
                 "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.CHECKED}=0",
                 arrayOf(courseId.toString())
             )
             val v2 = ContentValues().apply { put(Course.ETAT, 1) }
-            db.update(Course.TABLE, v2, "${Course.ID}=?", arrayOf(courseId.toString()))
-            db.setTransactionSuccessful()
+            dbh.writableDatabase.update(Course.TABLE, v2, "${Course.ID}=?", arrayOf(courseId.toString()))
+            dbh.writableDatabase.setTransactionSuccessful()
         } finally {
-            db.endTransaction()
+            dbh.writableDatabase.endTransaction()
         }
     }
 }

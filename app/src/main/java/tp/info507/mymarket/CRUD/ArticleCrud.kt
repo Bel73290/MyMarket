@@ -13,49 +13,42 @@ class ArticleCrud(context: Context) {
             put(Article.NAME, name)
         }
 
-        val db = dbh.writableDatabase
-        val res = db.insert(Article.TABLE, null, v)
+        val res = dbh.writableDatabase.insert(Article.TABLE, null, v)
         return res
     }
 
 
     fun getAll(): List<Article> {
-        val db = dbh.readableDatabase
-        val out = mutableListOf<Article>()
-        db.query(Article.TABLE, null, null, null, null, null, "${Article.NAME} ASC").use { c ->
+        val res = mutableListOf<Article>()
+        dbh.readableDatabase.query(Article.TABLE, null, null, null, null, null, "${Article.NAME} ASC").use { c ->
             while (c.moveToNext()) {
-                out += Article(
+                res += Article(
                     id = c.getInt(c.getColumnIndexOrThrow(Article.ID)),
                     name = c.getString(c.getColumnIndexOrThrow(Article.NAME))
                 )
             }
         }
-        return out
+        return res
     }
 
     fun getById(id: Int): Article? {
-        val db = dbh.readableDatabase
-        var result: Article? = null
-        db.query(
+        var res: Article? = null
+        dbh.readableDatabase.query(
             Article.TABLE, null,
             "${Article.ID}=?", arrayOf(id.toString()), null, null, null
         ).use { c ->
             if (c.moveToFirst()) {
-                result = Article(
+                res = Article(
                     id = c.getInt(c.getColumnIndexOrThrow(Article.ID)),
                     name = c.getString(c.getColumnIndexOrThrow(Article.NAME))
                 )
             }
         }
-        return result
+        return res
     }
 
     fun delete(id: Int): Int {
-        val rows = dbh.writableDatabase.delete(
-            Article.TABLE, "${Article.ID}=?", arrayOf(id.toString())
-        )
-        return rows
+        val res = dbh.writableDatabase.delete(Article.TABLE, "${Article.ID}=?", arrayOf(id.toString()))
+        return res
     }
-
-
 }
