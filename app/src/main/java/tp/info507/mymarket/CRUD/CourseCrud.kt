@@ -8,11 +8,11 @@ import td.info507.mymarket.modele.Course
 class CourseCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
 
-    fun createCourse(nom: String, date: String, prixInitial: Int): Long {
+    fun createCourse(nom: String, date: String, prix_initial: Int): Long {
         val v = ContentValues().apply {
             put(Course.NOM, nom)
             put(Course.DATE, date)
-            put(Course.PRIX_INITIAL, prixInitial)
+            put(Course.PRIX_INITIAL, prix_initial)
             put(Course.ETAT, 0)
         }
 
@@ -21,7 +21,7 @@ class CourseCrud(context: Context) {
         return res
     }
 
-    fun insert(c: Long): Long {
+    fun insert(c: Course): Long {
         val v = ContentValues().apply {
             put(Course.ID, c.id)
             put(Course.NOM, c.nom)
