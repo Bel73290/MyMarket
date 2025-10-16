@@ -8,35 +8,16 @@ import td.info507.mymarket.modele.Article
 class ArticleCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
 
-    fun upsertByName(name: String): Int {
-        val rdb = dbh.readableDatabase
-        var id = -1
-        rdb.query(
-            Article.TABLE,
-            arrayOf(Article.ID),
-            "${Article.NAME}=?",
-            arrayOf(name),
-            null, null, null
-        ).use { c ->
-            if (c.moveToFirst()) {
-                id = c.getInt(0)
-            }
-        }
-        if (id == -1) {
-            val v = ContentValues().apply { put(Article.NAME, name) }
-            id = dbh.writableDatabase.insert(Article.TABLE, null, v).toInt()
-        }
-        return id
-    }
-
-    fun insert(a: Article): Long {
+    fun createArticle(name: String): Long {
         val v = ContentValues().apply {
-            put(Article.ID, a.id)
-            put(Article.NAME, a.name)
+            put(Article.NAME, name)
         }
-        val res = dbh.writableDatabase.insert(Article.TABLE, null, v)
+
+        val db = dbh.writableDatabase
+        val res = db.insert(Article.TABLE, null, v)
         return res
     }
+
 
     fun getAll(): List<Article> {
         val db = dbh.readableDatabase
@@ -75,4 +56,6 @@ class ArticleCrud(context: Context) {
         )
         return rows
     }
+
+
 }
