@@ -84,10 +84,6 @@ fun ListeEvenement() {
                 contentDescription = "Profile Image",
             )
 
-
-            val text = remember {
-                mutableStateOf("")
-            }
             var conseil by remember { mutableStateOf("Chargement du conseil...") }
 
             LaunchedEffect(Unit) {
