@@ -84,8 +84,9 @@ fun ListeEvenement() {
                 contentDescription = "Profile Image",
             )
 
-            var conseil by remember { mutableStateOf("Chargement du conseil...") }
+            var conseil by remember { mutableStateOf("Chargement du conseil") }
 
+            //exécuter ce code qu’une seule fois au premier affichage”
             LaunchedEffect(Unit) {
                 conseil = getConseil()
             }
