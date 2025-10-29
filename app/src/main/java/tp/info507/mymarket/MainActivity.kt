@@ -8,7 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import td.info507.mymarket.crud.CourseCrud
 import td.info507.mymarket.ui.theme.MyMarketTheme
+import tp.info507.mymarket.GET.getConseil
 
 import tp.info507.mymarket.viewmodel.CourseLScreen
 
@@ -84,26 +88,29 @@ fun ListeEvenement() {
             val text = remember {
                 mutableStateOf("")
             }
-            OutlinedTextField(
+            var conseil by remember { mutableStateOf("Chargement du conseil...") }
+
+            LaunchedEffect(Unit) {
+                conseil = getConseil()
+            }
+
+            Box(
                 modifier = Modifier
-                    .padding(start = 20.dp)
-                    .weight(0.90f)
+                    .padding(start = 20.dp, end = 15.dp)
                     .height(65.dp)
-                    .padding(end = 15.dp)
-                    .background(colorResource(id = R.color.search)),
-
-
-                value = text.value,
-                onValueChange = { newText -> text.value = newText },
-
-                label = {
-                    Text(text = "Search")
-                },
-                leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                }
-
-            )
+                    .fillMaxWidth(0.90f)
+                    .background(Color.White)
+                    .border(width = 2.dp, color = Color.Black)
+                    .padding(10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = conseil,
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    maxLines = 2
+                )
+            }
         }
         var isVisible_CourseT by remember { mutableStateOf(true) }
         Row(
