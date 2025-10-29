@@ -145,7 +145,9 @@ fun ListeEvenement() {
                             .fillMaxWidth(),
                         onClick = {
                             val intent = Intent(context, CourseLScreen::class.java)
+                            intent.putExtra("COURSE_ID", course.id)
                             context.startActivity(intent)
+
                         },
                         colors = ButtonDefaults.buttonColors(
                             Color(0xFFD9D9D9),
@@ -278,7 +280,7 @@ fun Dialogue(showDialog: MutableState<Boolean>){
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text("Ajouter une liste") },
+            title = { Text("Ajouter une Course") },
             text = {
                 Column {
 
