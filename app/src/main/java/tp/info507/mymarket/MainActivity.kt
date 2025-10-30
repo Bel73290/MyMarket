@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +68,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+
 @SuppressLint("RememberReturnType")
 @Composable
 fun ListeEvenement() {
@@ -82,7 +86,17 @@ fun ListeEvenement() {
             Image(
                 painter = painterResource(R.drawable.ic_profil),
                 contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable {
+                        val intent = Intent(
+                            context,
+                            tp.info507.mymarket.viewmodel.SyntheseDepensesActivity::class.java
+                        )
+                        context.startActivity(intent)
+                    }
             )
+
 
             var conseil by remember { mutableStateOf("Chargement du conseil") }
 
@@ -277,6 +291,14 @@ fun Dialogue(showDialog: MutableState<Boolean>){
     var NomText by remember { mutableStateOf("") }
     var DateText by remember { mutableStateOf("") }
     var BudgetText by remember { mutableStateOf("") }
+    val cal = java.util.Calendar.getInstance()
+    val picker = android.app.DatePickerDialog(
+        context,
+        { _, y, m, d -> DateText = "%02d/%02d/%04d".format(d, m + 1, y) },
+        cal.get(java.util.Calendar.YEAR),
+        cal.get(java.util.Calendar.MONTH),
+        cal.get(java.util.Calendar.DAY_OF_MONTH)
+    )
 
     if (showDialog.value) {
         AlertDialog(
@@ -290,11 +312,26 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                         onValueChange = { NomText = it },
                         label = { Text("Nom") }
                     )
-                    OutlinedTextField(
-                        value = DateText,
-                        onValueChange = { DateText = it },
-                        label = { Text("Date") }
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable { picker.show() }
+                    ) {
+                        OutlinedTextField(
+                            value = DateText,
+                            onValueChange = { },
+                            label = { Text("Date (jj/mm/aaaa)") },
+                            readOnly = true,
+                            enabled = false,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = Color.Black,
+                                disabledBorderColor = Color.Black
+                            )
+
+                        )
+                    }
                     OutlinedTextField(
                         value = BudgetText,
                         onValueChange = { BudgetText = it },
