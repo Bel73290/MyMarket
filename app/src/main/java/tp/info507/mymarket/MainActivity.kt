@@ -19,12 +19,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -255,32 +257,38 @@ fun ListeEvenement() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(6.dp)
-                ,
+                .padding(6.dp),
             verticalArrangement = Arrangement.Bottom,
 
             ) {
             Row(
-                modifier = Modifier.fillMaxWidth()
-
-                    .background(Color.White),
-                horizontalArrangement = Arrangement.Center,
-
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding()
+                    .padding(bottom = 15.dp, end= 15.dp ),
+                verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
             ) {
 
-                IconButton(onClick = {
-                    showDialog2.value = true
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_caddis),
-                        contentDescription = "caddie",
-                        tint = Color.Black,
-                        modifier = Modifier.size(45.dp)
-                    )
+                Box(
+                    modifier = Modifier
+                        .size(60.dp) // taille du cercle
+                        .background(Color.Gray, shape = RoundedCornerShape(30.dp)), // c
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { showDialog2.value = true },
+                        modifier = Modifier.size(45.dp) // icône plus petite que le cercle
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_caddis),
+                            contentDescription = "caddie",
+                            tint = Color.Black
+                        )
+                    }
                 }
-
             }
+
             Dialogue(showDialog2)
         }
 

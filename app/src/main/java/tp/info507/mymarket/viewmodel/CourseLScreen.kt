@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -45,7 +47,9 @@ import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import td.info507.mymarket.crud.ArticleCrud
@@ -73,12 +77,15 @@ class CourseLScreen : ComponentActivity() {
 @Composable
 fun Test2(courseId: Int) {
     val context = LocalContext.current
-    Column() {
-        Box() {
-            Row(
-                modifier = Modifier
-                    .padding(top = 45.dp),
+    val crud = CourseArticleCrud(context)
+    var valeur by remember { mutableStateOf("") }
+    // Liste réactive des articles
+    var courses by remember { mutableStateOf(crud.getItems(courseId)) }
 
+    Column {
+        Box {
+            Row(
+                modifier = Modifier.padding(top = 45.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -100,14 +107,14 @@ fun Test2(courseId: Int) {
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
-
             }
-
         }
 
+        Log.d("DebugTest2", "Nombre d'articles dans courses: ${courses.size}")
+        courses.forEach { (_, name) ->
+            Log.d("DebugTest2", "Article affiché: $name")
+        }
 
-        val courses = CourseArticleCrud(context).getItems(courseId)
-        Log.d("TestCourses", "Nombre d'articles récupérés : ${courses.size}")
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(16.dp)
@@ -121,75 +128,121 @@ fun Test2(courseId: Int) {
                     Box(
                         modifier = Modifier
                             .size(30.dp)
-                            .background(Color.Green, shape = RoundedCornerShape(6.dp))
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(6.dp)),
+                            .background(
+                                color = if (courseArticle.checked) Color.Green else Color.Transparent,
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(6.dp))
+                            .clickable {
+                                crud.toggleChecked(courseId, courseArticle.articleId)
+                                courses = crud.getItems(courseId)
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (courseArticle.checked) "✓" else "X",
-                            color = if (courseArticle.checked) Color.White else Color.Red
-                        )
+                        if (courseArticle.checked) {
+                            Text(
+                                text = "✓",
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(name, modifier = Modifier.padding(top = 3.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = name,
+                        modifier = Modifier.padding(top = 3.dp),
+                        textDecoration = if (courseArticle.checked) TextDecoration.LineThrough else TextDecoration.None
+                    )
 
                     Spacer(modifier = Modifier.weight(1f))
 
+
+
                     Box(
                         modifier = Modifier
-                            .size(80.dp, 40.dp)
+                            .size(width = 80.dp, height = 40.dp)
                             .padding(end = 16.dp)
                             .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxSize(0.8f)
+                                .fillMaxSize(0.9f)
                                 .background(Color.White, shape = RoundedCornerShape(25.dp))
-                                .padding(4.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-
+                            androidx.compose.foundation.text.BasicTextField(
+                                value = valeur,
+                                onValueChange = { newValue ->
+                                    // garder uniquement les chiffres
+                                    if (newValue.all { it.isDigit() }) {
+                                        valeur = newValue
+                                    }
+                                },
+                                singleLine = true,
+                                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black)
+                            ) { innerTextField ->
+                                if (valeur.isEmpty()) {
+                                    androidx.compose.material3.Text(
+                                        text = "0",
+                                        color = Color.Gray
+                                    )
+                                }
+                                innerTextField() // texte saisi
+                            }
                         }
                     }
+
+
+
                 }
             }
         }
 
-
-
-        Column (modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
+        ) {
+            val showDialogArticle = remember { mutableStateOf(false) }
 
-        ){
-            val showDialogArticle= remember { mutableStateOf(false)}
-            Row(verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center){
-            IconButton(modifier = Modifier,
-                onClick = {showDialogArticle.value = true},
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Icon(
+                IconButton(
+                    onClick = { showDialogArticle.value = true },
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_add_circle_24),
+                        contentDescription = "add",
+                        tint = Color(0xFFD9D9D9),
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
 
-                    painter = painterResource(R.drawable.baseline_add_circle_24),
-                    contentDescription = "add",
-                    tint = Color(0xFFD9D9D9),
-                    modifier = Modifier
-                        .size(40.dp)
+                Dialogue_ajoue_article(
+                    showDialog = showDialogArticle,
+                    courseId = courseId,
+                    onArticleAdded = {
+                        // recharge la liste après ajout
+                        courses = crud.getItems(courseId)
+                        Log.d("TestCourses", "Liste rechargée : ${courses.size} articles")
+                    }
                 )
             }
-
-                Dialogue_ajoue_article(showDialogArticle, courseId = courseId)
-        }
 
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(6.dp),
-                onClick = {},
+                onClick = {val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)},
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF000000),
                     contentColor = Color.Black
@@ -200,23 +253,25 @@ fun Test2(courseId: Int) {
                     color = Color.White
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun Dialogue_ajoue_article(showDialog: MutableState<Boolean>, courseId: Int){
+fun Dialogue_ajoue_article(
+    showDialog: MutableState<Boolean>,
+    courseId: Int,
+    onArticleAdded: () -> Unit
+) {
     val context = LocalContext.current
     var NomText by remember { mutableStateOf("") }
 
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text("Ajouter un Articles") },
+            title = { Text("Ajouter un Article") },
             text = {
                 Column {
-
                     OutlinedTextField(
                         value = NomText,
                         onValueChange = { NomText = it },
@@ -225,46 +280,32 @@ fun Dialogue_ajoue_article(showDialog: MutableState<Boolean>, courseId: Int){
                 }
             },
             dismissButton = {
-                Button(modifier=Modifier,
-                    onClick = { showDialog.value = false },
-                    colors = ButtonDefaults.buttonColors(
-                        Color(0xFFFFFFFF),
-                        contentColor = Color.Black
-                    )) {
+                Button(onClick = { showDialog.value = false }) {
                     Text("Annuler")
                 }
             },
             confirmButton = {
-                Button(
-                    modifier=Modifier,
-                    onClick = {
+                Button(onClick = {
+                    val articleCrud = ArticleCrud(context)
+                    val courseArticleCrud = CourseArticleCrud(context)
 
-                        val articleCrud = ArticleCrud(context)
-                        val courseArticleCrud = CourseArticleCrud(context)
+                    if (NomText.isNotBlank()) {
+                        courseArticleCrud.createItem(courseId, NomText, 0)
+                        Log.d("DebugAddArticle", "Article ajouté: $NomText, courseId=$courseId")
+                        onArticleAdded() // recharge la liste
+                    }
 
-                        val articleId = articleCrud.createArticle(NomText).toInt()
 
-                        courseArticleCrud.createItem(
-                            courseId = courseId,
-                            name = NomText,
-                            priceEstime = 0
-                        )
 
-                        showDialog.value = false
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        Color(0xFF000000),
-                        contentColor = Color.White
-                    )
-                ) {
+                    showDialog.value = false
+                }) {
                     Text("Valider")
                 }
-
             }
-
         )
     }
 }
+
 
 
 @Preview(showBackground = true)
