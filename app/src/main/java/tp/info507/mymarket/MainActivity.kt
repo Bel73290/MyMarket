@@ -11,6 +11,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -107,18 +110,18 @@ fun ListeEvenement() {
 
             var conseil by remember { mutableStateOf("Chargement du conseil") }
 
-            //exécuter ce code qu’une seule fois au premier affichage”
+
             LaunchedEffect(Unit) {
                 conseil = getConseil()
             }
 
             Box(
                 modifier = Modifier
-                    .padding(start = 20.dp, end = 15.dp)
-                    .height(65.dp)
+                    .padding(start = 20.dp)
+                    .height(50.dp)
                     .fillMaxWidth(0.90f)
-                    .background(Color.White)
-                    .border(width = 2.dp, color = Color.Black)
+                    .border(width = 2.dp, color = Color.DarkGray,shape = RoundedCornerShape(25.dp))
+                    .background(Color.White,shape = RoundedCornerShape(25.dp))
                     .padding(10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -168,6 +171,7 @@ fun ListeEvenement() {
                         onClick = {
                             val intent = Intent(context, CourseLScreen::class.java)
                             intent.putExtra("COURSE_ID", course.id)
+                            intent.putExtra("prix_initial", course.prix_initial)
                             context.startActivity(intent)
 
                         },
@@ -209,11 +213,13 @@ fun ListeEvenement() {
 
 
             IconButton(
+
                 onClick = { isVisible = !isVisible }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
+
                     tint = Color.Gray
                 )
             }
@@ -272,13 +278,13 @@ fun ListeEvenement() {
 
                 Box(
                     modifier = Modifier
-                        .size(60.dp) // taille du cercle
-                        .background(Color.Gray, shape = RoundedCornerShape(30.dp)), // c
+                        .size(60.dp)
+                        .background(Color(0xFFD9D9D9), shape = RoundedCornerShape(30.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
                         onClick = { showDialog2.value = true },
-                        modifier = Modifier.size(45.dp) // icône plus petite que le cercle
+                        modifier = Modifier.size(45.dp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_caddis),

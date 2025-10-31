@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,22 +68,23 @@ class CourseLScreen : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val courseId = intent.getIntExtra("COURSE_ID", -1)
+        val prix_initial = intent.getIntExtra("prix_initial", -1)
+        prix_initial
         setContent {
             MyMarketTheme {
-                Test2(courseId)
+                Test2(courseId,prix_initial)
             }
         }
     }
 }
 @Composable
-fun Test2(courseId: Int) {
+fun Test2(courseId: Int, prix_initial: Int) {
     val context = LocalContext.current
     val crud = CourseArticleCrud(context)
     var valeur by remember { mutableStateOf("") }
-    // Liste réactive des articles
     var courses by remember { mutableStateOf(crud.getItems(courseId)) }
 
-    Column {
+    Column() {
         Box {
             Row(
                 modifier = Modifier.padding(top = 45.dp),
@@ -110,7 +112,7 @@ fun Test2(courseId: Int) {
             }
         }
 
-        Log.d("DebugTest2", "Nombre d'articles dans courses: ${courses.size}")
+
         courses.forEach { (_, name) ->
             Log.d("DebugTest2", "Article affiché: $name")
         }
@@ -118,6 +120,7 @@ fun Test2(courseId: Int) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(16.dp)
+
         ) {
             courses.forEach { (courseArticle, name) ->
                 Row(
@@ -229,13 +232,49 @@ fun Test2(courseId: Int) {
                 Dialogue_ajoue_article(
                     showDialog = showDialogArticle,
                     courseId = courseId,
-                    onArticleAdded = {
-                        // recharge la liste après ajout
+                    ArticleAdd = {
                         courses = crud.getItems(courseId)
-                        Log.d("TestCourses", "Liste rechargée : ${courses.size} articles")
                     }
                 )
             }
+
+            Box(
+                modifier = Modifier
+                    .size(width = 210.dp, height = 40.dp)
+                    .padding(end = 16.dp)
+                    .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Budget Estimer", color = Color.White)
+
+                    Box(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .fillMaxHeight()
+                            .background(Color.White, shape = RoundedCornerShape(25.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = prix_initial.toString(),
+                            color = Color.Black
+                        )
+
+                    }
+                    Text(
+                        text ="€",
+                        color = Color.White
+                    )
+                }
+            }
+
 
             Button(
                 modifier = Modifier
@@ -258,11 +297,7 @@ fun Test2(courseId: Int) {
 }
 
 @Composable
-fun Dialogue_ajoue_article(
-    showDialog: MutableState<Boolean>,
-    courseId: Int,
-    onArticleAdded: () -> Unit
-) {
+fun Dialogue_ajoue_article(showDialog: MutableState<Boolean>, courseId: Int, ArticleAdd: () -> Unit) {
     val context = LocalContext.current
     var NomText by remember { mutableStateOf("") }
 
@@ -291,8 +326,7 @@ fun Dialogue_ajoue_article(
 
                     if (NomText.isNotBlank()) {
                         courseArticleCrud.createItem(courseId, NomText, 0)
-                        Log.d("DebugAddArticle", "Article ajouté: $NomText, courseId=$courseId")
-                        onArticleAdded() // recharge la liste
+                        ArticleAdd() // recharge la liste
                     }
 
 
@@ -313,6 +347,6 @@ fun Dialogue_ajoue_article(
 @Composable
 fun GreetingPreview() {
     MyMarketTheme {
-        Test2(courseId = 1)
+        Test2(courseId = 1,150)
     }
 }
