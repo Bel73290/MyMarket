@@ -17,7 +17,7 @@ suspend fun getConseil(): String {
         //recup du conseil aléatoire avec Ramdom.nextInt
         val arr = JSONObject(jsonText).getJSONArray("conseils")
         val i = Random.nextInt(arr.length())
-        arr.getJSONObject(i).getString("description") //affichage
+        arr.getJSONObject(i).getString("description") //recupétation du conseil aléatoire
     } catch (e: Exception) {
         "Erreur de récupération du conseil"
     }

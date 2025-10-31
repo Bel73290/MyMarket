@@ -12,13 +12,13 @@ class CourseArticleCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
     private val articleCrud = ArticleCrud(context)
 
-    /** Crée une nouvelle ligne pour la course (crée aussi un Article avec ce name). */
+    //Crée une nouvelle ligne pour la course et un Article avec son nom
     fun createItem(courseId: Int, name: String, priceEstime: Int): Long {
-        // 1) Créer l'article (doublons autorisés)
+        //Créer l'article
         val articleIdLong = articleCrud.createArticle(name)
         val articleId = articleIdLong.toInt()
 
-        // 2) Créer la ligne CourseArticle
+        //Créer la ligne CourseArticle
         val v = ContentValues().apply {
             put(CourseArticle.COURSE_ID, courseId)
             put(CourseArticle.ARTICLE_ID, articleId)
@@ -32,7 +32,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Met à jour le prix final d’un article de la course. */
+    // met a jour le prix final
     fun setFinalPrice(courseId: Int, articleId: Int, price: Int): Int {
         val v = ContentValues().apply { put(CourseArticle.PRICE_FINAL, price) }
         val res = dbh.writableDatabase.update(
@@ -43,7 +43,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Coche/décoche. Si on coche et price_final == 0 → price_final = price_estime. */
+    // Coche/décoche Si on coche et price_final == 0 → price_final = price_estime
     fun toggleChecked(courseId: Int, articleId: Int): Int {
 
         var curChecked = 0
@@ -82,7 +82,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Supprime une ligne (un article) de la course. */
+    //Supprimer une ligne article
     fun removeItem(courseId: Int, articleId: Int): Int {
         val res = dbh.writableDatabase.delete(
             CourseArticle.TABLE,
@@ -92,10 +92,9 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /**
-     * Liste les lignes d’une course.
-     * Renvoie Pair(CourseArticle, nomArticle) pour rester fidèle au modèle (pas de champ name dans CourseArticle).
-     */
+
+     //Liste les lignes d’une course.
+     //Renvoie Pair(CourseArticle, nomArticle) pour rester fidèle au modèle
     fun getItems(courseId: Int): List<Pair<CourseArticle, String>> {
         val sql = """
             SELECT ca.${CourseArticle.ARTICLE_ID} AS article_id,
@@ -127,7 +126,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Total courant: somme des price_final des lignes COCHÉES. */
+    // Total courrant quand on coche sans que la course soit finit
     fun budgetFinalDuring(courseId: Int): Int {
         val sql = "SELECT IFNULL(SUM(${CourseArticle.PRICE_FINAL}),0) FROM ${CourseArticle.TABLE} WHERE ${CourseArticle.COURSE_ID}=? AND ${CourseArticle.CHECKED}=1"
         var res = 0
@@ -139,7 +138,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Total final après validation (toutes les lignes, les non cochées seront mises à 0 par finishCourse). */
+    // calcul du total final de la courseArticle
     fun budgetFinalAfter(courseId: Int): Int {
         val sql = "SELECT IFNULL(SUM(${CourseArticle.PRICE_FINAL}),0) FROM ${CourseArticle.TABLE} WHERE ${CourseArticle.COURSE_ID}=?"
         var res = 0
@@ -151,7 +150,7 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    /** Termine la course : met price_final=0 pour les non cochés, puis etat=1 sur Course. */
+    // Termine la course met price_final=0 pour les non coché puis etat=1 sur la CourseArticle
     fun finishCourse(courseId: Int) {
         dbh.writableDatabase.beginTransaction()
         try {

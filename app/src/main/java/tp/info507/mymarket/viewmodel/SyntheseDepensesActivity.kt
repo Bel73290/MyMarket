@@ -42,7 +42,7 @@ fun SyntheseDepensesScreen() {
 
     var parMois by remember { mutableStateOf<List<Pair<String, Int>>>(emptyList()) }
 
-    // "jj/mm/aaaa" ou "aaaa-mm-jj" -> "01".."12"
+    // "jj/mm/aaaa" -> "01".."12"
     fun extractMonth(date: String): String {
         val d = date.trim()
         return when {
@@ -50,6 +50,8 @@ fun SyntheseDepensesScreen() {
             else -> "??"
         }
     }
+
+    //transforme les mois en String
     val moisLabel = mapOf(
         "01" to "Janvier", "02" to "Février", "03" to "Mars", "04" to "Avril",
         "05" to "Mai", "06" to "Juin", "07" to "Juillet", "08" to "Août",
@@ -64,6 +66,8 @@ fun SyntheseDepensesScreen() {
             val finalCourse = caCrud.budgetFinalAfter(c.id)
             map[mois] = (map[mois] ?: 0) + finalCourse
         }
+
+        //trie dans l'ordre
         parMois = map.entries
             .sortedBy { it.key.padStart(2, '0') }
             .map { (m, v) -> (moisLabel[m] ?: "Mois $m") to v }
@@ -96,7 +100,7 @@ fun SyntheseDepensesScreen() {
             textAlign = TextAlign.Center
         )
 
-        // Liste des mois
+        // Liste des mois avec leur montant associé
         for ((mois, montant) in parMois) {
             Surface(
                 tonalElevation = 0.dp,

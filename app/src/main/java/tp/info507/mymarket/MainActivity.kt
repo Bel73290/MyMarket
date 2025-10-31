@@ -2,6 +2,11 @@ package tp.info507.mymarket
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -359,12 +364,18 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                     modifier=Modifier
                         .fillMaxWidth(),
                     onClick = {
-                        val budgetInt: Int = BudgetText.toIntOrNull() ?: 0 // valeur par défaut si vide
+                        //vibration courte
+                        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        vibrator.vibrate(150)
+
+                        // Insertion de la course
+                        val budgetInt: Int = BudgetText.toIntOrNull() ?: 0
                         val storage = CourseCrud(context)
                         storage.createCourse(NomText, DateText.ifEmpty { "2025-10-10" }, budgetInt)
 
                         showDialog.value = false
-                    },
+                    }
+                    ,
                     colors = ButtonDefaults.buttonColors(
                         Color(0xFF000000),
                         contentColor = Color.White
