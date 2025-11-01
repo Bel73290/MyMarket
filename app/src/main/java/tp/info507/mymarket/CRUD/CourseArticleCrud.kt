@@ -3,6 +3,7 @@ package td.info507.mymarket.crud
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import td.info507.mymarket.helper.DataBaseHelper
 import td.info507.mymarket.modele.Article
 import td.info507.mymarket.modele.Course
@@ -12,13 +13,17 @@ class CourseArticleCrud(context: Context) {
     private val dbh = DataBaseHelper(context)
     private val articleCrud = ArticleCrud(context)
 
+
     //Crée une nouvelle ligne pour la course et un Article avec son nom
     fun createItem(courseId: Int, name: String, priceEstime: Int): Long {
-        //Créer l'article
-        val articleIdLong = articleCrud.createArticle(name)
-        val articleId = articleIdLong.toInt()
+        // Vérifie si l'article existe déjà
+        val existingArticle = articleCrud.getAll().find { it.name == name }
+        val articleId = if (existingArticle != null) {
+            existingArticle.id
+        } else {
+            articleCrud.createArticle(name).toInt()
+        }
 
-        //Créer la ligne CourseArticle
         val v = ContentValues().apply {
             put(CourseArticle.COURSE_ID, courseId)
             put(CourseArticle.ARTICLE_ID, articleId)
@@ -26,11 +31,13 @@ class CourseArticleCrud(context: Context) {
             put(CourseArticle.PRICE_FINAL, priceEstime)
             put(CourseArticle.CHECKED, 0)
         }
-        val res = dbh.writableDatabase.insertWithOnConflict(
+
+        return dbh.writableDatabase.insertWithOnConflict(
             CourseArticle.TABLE, null, v, SQLiteDatabase.CONFLICT_REPLACE
         )
-        return res
     }
+
+
 
     // met a jour le prix final
     fun setFinalPrice(courseId: Int, articleId: Int, price: Int): Int {
@@ -123,6 +130,10 @@ class CourseArticleCrud(context: Context) {
                 res += Pair(item, articleName)
             }
         }
+         Log.d("DebugGetItems", "courseId=$courseId, articles récupérés=${res.size}")
+         res.forEach { (_, name) ->
+             Log.d("DebugGetItems", "Article: $name")
+         }
         return res
     }
 
