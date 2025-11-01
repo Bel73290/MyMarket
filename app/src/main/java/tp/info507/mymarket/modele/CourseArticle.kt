@@ -3,7 +3,6 @@ package td.info507.mymarket.modele
 data class CourseArticle(
     val courseId: Int,
     val articleId: Int,
-    val price_estime: Int,
     val price_final: Int,
     val checked: Boolean
 ) {
@@ -11,7 +10,6 @@ data class CourseArticle(
         const val TABLE = "CourseArticle"
         const val COURSE_ID = "course_id"
         const val ARTICLE_ID = "article_id"
-        const val PRICE_ESTIME = "price_estime"
         const val PRICE_FINAL  = "price_final"
         const val CHECKED = "checked"
     }

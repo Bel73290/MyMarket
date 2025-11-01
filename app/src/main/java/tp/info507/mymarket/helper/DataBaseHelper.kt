@@ -33,7 +33,6 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, "mymarket.db"
             "CREATE TABLE ${CourseArticle.TABLE} (" +
                     "${CourseArticle.COURSE_ID} INTEGER," +
                     "${CourseArticle.ARTICLE_ID} INTEGER," +
-                    "${CourseArticle.PRICE_ESTIME} INTEGER," +
                     "${CourseArticle.PRICE_FINAL} INTEGER," +
                     "${CourseArticle.CHECKED} INTEGER," +
                     "PRIMARY KEY(${CourseArticle.COURSE_ID}, ${CourseArticle.ARTICLE_ID})," +

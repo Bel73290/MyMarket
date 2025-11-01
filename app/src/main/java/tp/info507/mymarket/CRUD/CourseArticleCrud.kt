@@ -27,8 +27,7 @@ class CourseArticleCrud(context: Context) {
         val v = ContentValues().apply {
             put(CourseArticle.COURSE_ID, courseId)
             put(CourseArticle.ARTICLE_ID, articleId)
-            put(CourseArticle.PRICE_ESTIME, priceEstime)
-            put(CourseArticle.PRICE_FINAL, priceEstime)
+            put(CourseArticle.PRICE_FINAL, 0)
             put(CourseArticle.CHECKED, 0)
         }
 
@@ -50,44 +49,33 @@ class CourseArticleCrud(context: Context) {
         return res
     }
 
-    // Coche/décoche Si on coche et price_final == 0 → price_final = price_estime
+    // Coche/décoche Si on coche on ajoute au prix
     fun toggleChecked(courseId: Int, articleId: Int): Int {
-
         var curChecked = 0
-        var curFinal = 0
-        var curEstime = 0
         dbh.writableDatabase.query(
             CourseArticle.TABLE,
-            arrayOf(CourseArticle.CHECKED, CourseArticle.PRICE_FINAL, CourseArticle.PRICE_ESTIME),
+            arrayOf(CourseArticle.CHECKED),
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
             arrayOf(courseId.toString(), articleId.toString()),
             null, null, null
         ).use { c ->
             if (c.moveToFirst()) {
                 curChecked = c.getInt(0)
-                curFinal = c.getInt(1)
-                curEstime = c.getInt(2)
             }
         }
 
         val newChecked = if (curChecked == 1) 0 else 1
         val v = ContentValues().apply { put(CourseArticle.CHECKED, newChecked) }
+
         val res = dbh.writableDatabase.update(
             CourseArticle.TABLE, v,
             "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
             arrayOf(courseId.toString(), articleId.toString())
         )
 
-        if (newChecked == 1 && curFinal == 0) {
-            val v2 = ContentValues().apply { put(CourseArticle.PRICE_FINAL, curEstime) }
-            dbh.writableDatabase.update(
-                CourseArticle.TABLE, v2,
-                "${CourseArticle.COURSE_ID}=? AND ${CourseArticle.ARTICLE_ID}=?",
-                arrayOf(courseId.toString(), articleId.toString())
-            )
-        }
         return res
     }
+
 
     //Supprimer une ligne article
     fun removeItem(courseId: Int, articleId: Int): Int {
@@ -106,7 +94,6 @@ class CourseArticleCrud(context: Context) {
         val sql = """
             SELECT ca.${CourseArticle.ARTICLE_ID} AS article_id,
                    a.${Article.NAME} AS name,
-                   ca.${CourseArticle.PRICE_ESTIME},
                    ca.${CourseArticle.PRICE_FINAL},
                    ca.${CourseArticle.CHECKED}
             FROM ${CourseArticle.TABLE} ca
@@ -122,7 +109,6 @@ class CourseArticleCrud(context: Context) {
                 val item = CourseArticle(
                     courseId = courseId,
                     articleId = c.getInt(c.getColumnIndexOrThrow("article_id")),
-                    price_estime = c.getInt(c.getColumnIndexOrThrow(CourseArticle.PRICE_ESTIME)),
                     price_final  = c.getInt(c.getColumnIndexOrThrow(CourseArticle.PRICE_FINAL)),
                     checked      = c.getInt(c.getColumnIndexOrThrow(CourseArticle.CHECKED)) == 1
                 )

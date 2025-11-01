@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import td.info507.mymarket.crud.CourseArticleCrud
 import td.info507.mymarket.crud.CourseCrud
 import td.info507.mymarket.ui.theme.MyMarketTheme
 import tp.info507.mymarket.GET.getConseil
@@ -85,15 +86,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ListeEvenement() {
     val context = LocalContext.current
-    Column(modifier= Modifier
-        .verticalScroll(rememberScrollState())) {
+    val courseCrud = remember { CourseCrud(context) }
+    val caCrud = remember { CourseArticleCrud(context) }
+
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        //profil + conseil
         Row(
             modifier = Modifier
                 .padding(top = 45.dp)
                 .padding(start = 18.dp),
             verticalAlignment = Alignment.CenterVertically
-        )
-        {
+        ) {
             Image(
                 painter = painterResource(R.drawable.ic_profil),
                 contentDescription = "Profile Image",
@@ -108,21 +113,20 @@ fun ListeEvenement() {
                     }
             )
 
-
             var conseil by remember { mutableStateOf("Chargement du conseil") }
-
-
-            LaunchedEffect(Unit) {
-                conseil = getConseil()
-            }
+            LaunchedEffect(Unit) { conseil = getConseil() }
 
             Box(
                 modifier = Modifier
                     .padding(start = 20.dp)
                     .height(50.dp)
                     .fillMaxWidth(0.90f)
-                    .border(width = 2.dp, color = Color.DarkGray,shape = RoundedCornerShape(25.dp))
-                    .background(Color.White,shape = RoundedCornerShape(25.dp))
+                    .border(
+                        width = 2.dp,
+                        color = Color.DarkGray,
+                        shape = RoundedCornerShape(25.dp)
+                    )
+                    .background(Color.White, shape = RoundedCornerShape(25.dp))
                     .padding(10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -134,6 +138,8 @@ fun ListeEvenement() {
                 )
             }
         }
+
+        //Course à faire (etat = false)
         var isVisible_CourseT by remember { mutableStateOf(true) }
         Row(
             modifier = Modifier.padding(6.dp),
@@ -145,10 +151,7 @@ fun ListeEvenement() {
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 25.sp
             )
-            IconButton(
-                onClick = { isVisible_CourseT = !isVisible_CourseT },
-
-                ) {
+            IconButton(onClick = { isVisible_CourseT = !isVisible_CourseT }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
@@ -161,44 +164,48 @@ fun ListeEvenement() {
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .padding(end = 15.dp),
-
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val courses = CourseCrud(context).getAll()
+                val courses = courseCrud.getAll()
+                var hasRow = false
                 for (course in courses) {
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        onClick = {
-                            val intent = Intent(context, CourseLScreen::class.java)
-                            intent.putExtra("COURSE_ID", course.id)
-                            intent.putExtra("prix_initial", course.prix_initial)
-                            context.startActivity(intent)
-
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            Color(0xFFD9D9D9),
-                            contentColor = Color.Black
-                        )
-
-
-                    ) {
-
-                        Column() {
-                            Text("Nom: ${course.nom}")
-                            Text("Nombre d'articles: ${course.id}")
+                    if (!course.etat) {
+                        hasRow = true
+                        val nbArticles = caCrud.nbArticleCourse(course.id)
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                val intent = Intent(context, CourseLScreen::class.java)
+                                intent.putExtra("COURSE_ID", course.id)
+                                intent.putExtra("prix_initial", course.prix_initial)
+                                context.startActivity(intent)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                Color(0xFFD9D9D9),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Column {
+                                Text("Nom: ${course.nom}")
+                                Text("Nombre d'articles: $nbArticles")
+                            }
+                            Column(modifier = Modifier.padding(start = 56.dp)) {
+                                Text("Budget estimé: ${course.prix_initial}€")
+                            }
                         }
-                        Column(modifier = Modifier.padding(start = 56.dp)) {
-                            Text("Budgets Final: ${course.prix_initial}$")
-
-                        }
-
                     }
-
-
+                }
+                if (!hasRow) {
+                    Text(
+                        text = "Aucune course à faire",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 6.dp)
+                    )
                 }
             }
         }
+
+        //Course Terminée (etat = true)
         var isVisible by remember { mutableStateOf(true) }
         Row(
             modifier = Modifier.padding(6.dp),
@@ -210,96 +217,99 @@ fun ListeEvenement() {
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 25.sp
             )
-
-
-
-            IconButton(
-
-                onClick = { isVisible = !isVisible }
-            ) {
+            IconButton(onClick = { isVisible = !isVisible }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
-
                     tint = Color.Gray
                 )
             }
-
         }
-
         if (isVisible) {
-
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .padding(end = 15.dp),
-
                 verticalArrangement = Arrangement.spacedBy(16.dp)
-
             ) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth(), onClick = {
-                        val intent = Intent(context, CourseLScreen::class.java)
-                        context.startActivity(intent)
-                    }, colors = ButtonDefaults.buttonColors(
-                        Color(0xFFD9D9D9),
-                        contentColor = Color.Black
+                val courses = courseCrud.getAll()
+                var hasRow = false
+                for (course in courses) {
+                    if (course.etat) { // terminée
+                        hasRow = true
+                        val nbArticles = caCrud.nbArticleCourse(course.id)
+                        val totalFinal = caCrud.budgetFinalAfter(course.id)
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                val intent = Intent(context, CourseLScreen::class.java)
+                                intent.putExtra("COURSE_ID", course.id)
+                                intent.putExtra("prix_initial", course.prix_initial)
+                                context.startActivity(intent)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                Color(0xFFD9D9D9),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Column {
+                                Text("Nom: ${course.nom}")
+                                Text("Nombre d'articles: $nbArticles")
+                            }
+                            Column(modifier = Modifier.padding(start = 56.dp)) {
+                                Text("Budget final: ${totalFinal}€")
+                            }
+                        }
+                    }
+                }
+                if (!hasRow) {
+                    Text(
+                        text = "Aucune course terminée",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 6.dp)
                     )
-                ) {
-                    Column() {
-                        Text("Nom: Course 1")
-                        Text("Nombre d'articles: 50")
-                    }
-                    Column(modifier = Modifier.padding(start = 56.dp)) {
-                        Text("Budgets Final: 100$")
-
-                    }
                 }
-
             }
         }
     }
-        val showDialog2 = remember { mutableStateOf(false)}
-        Column(
+
+    // ----- Bouton rond en bas à droite (ajout course) -----
+    val showDialog2 = remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp),
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp),
-            verticalArrangement = Arrangement.Bottom,
-
-            ) {
-            Row(
+                .fillMaxWidth()
+                .padding(bottom = 15.dp, end = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding()
-                    .padding(bottom = 15.dp, end= 15.dp ),
-                verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
+                    .size(60.dp)
+                    .background(Color(0xFFD9D9D9), shape = RoundedCornerShape(30.dp)),
+                contentAlignment = Alignment.Center
             ) {
-
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(Color(0xFFD9D9D9), shape = RoundedCornerShape(30.dp)),
-                    contentAlignment = Alignment.Center
+                IconButton(
+                    onClick = { showDialog2.value = true },
+                    modifier = Modifier.size(45.dp)
                 ) {
-                    IconButton(
-                        onClick = { showDialog2.value = true },
-                        modifier = Modifier.size(45.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_caddis),
-                            contentDescription = "caddie",
-                            tint = Color.Black
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_caddis),
+                        contentDescription = "caddie",
+                        tint = Color.Black
+                    )
                 }
             }
-
-            Dialogue(showDialog2)
         }
-
+        Dialogue(showDialog2)
     }
+}
+
 
 
 

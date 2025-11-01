@@ -42,16 +42,15 @@ fun SyntheseDepensesScreen() {
 
     var parMois by remember { mutableStateOf<List<Pair<String, Int>>>(emptyList()) }
 
-    // "jj/mm/aaaa" -> "01".."12"
-    fun extractMonth(date: String): String {
-        val d = date.trim()
-        return when {
-            d.contains("/") && d.split("/").size >= 2 -> d.split("/")[1]
-            else -> "??"
-        }
+    // Extrait le mois et l’année du format jj/mm/aaaa
+    fun extractMonthYear(date: String): Pair<String, String> {
+        val parts = date.trim().split("/")
+        val mois = parts.getOrNull(1).orEmpty()
+        val annee = parts.getOrNull(2).orEmpty()
+        return mois to annee
     }
 
-    //transforme les mois en String
+    // Associe les numéros de mois à leur nom
     val moisLabel = mapOf(
         "01" to "Janvier", "02" to "Février", "03" to "Mars", "04" to "Avril",
         "05" to "Mai", "06" to "Juin", "07" to "Juillet", "08" to "Août",
@@ -60,17 +59,25 @@ fun SyntheseDepensesScreen() {
 
     LaunchedEffect(Unit) {
         val courses = courseCrud.getAll()
-        val map = linkedMapOf<String, Int>()
+        val map = linkedMapOf<String, Int>() // clé : "aaaa/mm"
+
         for (c in courses) {
-            val mois = extractMonth(c.date)
+            if (!c.etat) continue //On ne garde que les courses terminées
+            val (mois, annee) = extractMonthYear(c.date)
+            if (mois.length != 2 || annee.isEmpty()) continue
+            val key = "$annee/$mois"
             val finalCourse = caCrud.budgetFinalAfter(c.id)
-            map[mois] = (map[mois] ?: 0) + finalCourse
+            map[key] = (map[key] ?: 0) + finalCourse
         }
 
-        //trie dans l'ordre
+        //Trie chronologiquement et transforme les clés en labels lisibles
         parMois = map.entries
-            .sortedBy { it.key.padStart(2, '0') }
-            .map { (m, v) -> (moisLabel[m] ?: "Mois $m") to v }
+            .sortedBy { it.key } // "2025/01", "2025/02", ...
+            .map { (k, v) ->
+                val parts = k.split("/")
+                val label = "${moisLabel[parts[1]] ?: "Mois ${parts[1]}"} ${parts[0]}"
+                label to v
+            }
     }
 
     Column(
@@ -79,7 +86,7 @@ fun SyntheseDepensesScreen() {
             .padding(45.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        // Retour simple à l'écran précédent
+        //Bouton retour
         IconButton(
             modifier = Modifier.padding(start = 0.dp),
             onClick = {
@@ -89,7 +96,7 @@ fun SyntheseDepensesScreen() {
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_fleche_gauche),
-                contentDescription = "Galerie",
+                contentDescription = "Retour",
                 tint = Color.Gray
             )
         }
@@ -100,8 +107,8 @@ fun SyntheseDepensesScreen() {
             textAlign = TextAlign.Center
         )
 
-        // Liste des mois avec leur montant associé
-        for ((mois, montant) in parMois) {
+        //Liste des dépenses
+        for ((label, montant) in parMois) {
             Surface(
                 tonalElevation = 0.dp,
                 shadowElevation = 1.dp,
@@ -113,14 +120,14 @@ fun SyntheseDepensesScreen() {
                     Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(mois, modifier = Modifier.weight(1f))
+                    Text(label, modifier = Modifier.weight(1f))
                     Text("$montant €", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
 
         if (parMois.isEmpty()) {
-            Text("Aucune dépense trouvée.", color = Color.Gray)
+            Text("Aucune dépense trouvée (courses terminées).", color = Color.Gray)
         }
     }
 }
