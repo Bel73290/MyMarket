@@ -167,4 +167,20 @@ class CourseArticleCrud(context: Context) {
             dbh.writableDatabase.endTransaction()
         }
     }
+
+    //compte le nombre d'article dans une course
+    fun nbArticleCourse(courseId: Int): Int {
+        var res = 0
+        val cursor = dbh.readableDatabase.rawQuery(
+            "SELECT COUNT(*) FROM ${CourseArticle.TABLE} WHERE ${CourseArticle.COURSE_ID} = ?",
+            arrayOf(courseId.toString())
+        )
+
+        if (cursor.moveToFirst()) {
+            res = cursor.getInt(0)
+        }
+        cursor.close()
+        return res
+    }
+
 }
