@@ -206,7 +206,8 @@ fun ListeEvenement() {
                                 Text("Nombre d'articles: $nbArticles")
                             }
                             Column(modifier = Modifier.padding(start = 56.dp)) {
-                                Text("Budget estimé: ${course.prix_initial}€")
+                                Text("Budget estimé: ${course.prix_initial}€",
+                                    fontSize = 12.sp)
                             }
                         }
                     }
