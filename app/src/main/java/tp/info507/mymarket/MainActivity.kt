@@ -202,7 +202,7 @@ fun ListeEvenement() {
                             )
                         ) {
                             Column {
-                                Text("Nom: ${course.nom}")
+                                Text("Nom: ${course.nom} du ${course.date}")
                                 Text("Nombre d'articles: $nbArticles")
                             }
                             Column(modifier = Modifier.padding(start = 56.dp)) {
@@ -281,7 +281,7 @@ fun ListeEvenement() {
                         )
                          {
                             Column {
-                                Text("Nom: ${course.nom}")
+                                Text("Nom: ${course.nom} du ${course.date}")
                                 Text("Nombre d'articles: $nbArticles")
                             }
                             Column(modifier = Modifier.padding(start = 56.dp)) {
