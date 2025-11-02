@@ -8,6 +8,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,12 +51,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,7 +68,7 @@ import td.info507.mymarket.ui.theme.MyMarketTheme
 import tp.info507.mymarket.GET.getConseil
 
 import tp.info507.mymarket.viewmodel.CourseLScreen
-
+import tp.info507.mymarket.viewmodel.CourseScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -88,6 +92,10 @@ fun ListeEvenement() {
     val context = LocalContext.current
     val courseCrud = remember { CourseCrud(context) }
     val caCrud = remember { CourseArticleCrud(context) }
+    val courses = remember { mutableStateOf(courseCrud.getAll()) }
+    var isRotated_E by remember { mutableStateOf(true) }
+    var isRotated_F by remember { mutableStateOf(true) }
+
 
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
@@ -124,9 +132,9 @@ fun ListeEvenement() {
                     .border(
                         width = 2.dp,
                         color = Color.DarkGray,
-                        shape = RoundedCornerShape(25.dp)
+                        shape = RoundedCornerShape(8.dp)
                     )
-                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                    .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
                     .padding(10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -134,13 +142,17 @@ fun ListeEvenement() {
                     text = conseil,
                     color = Color.Black,
                     fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
                     maxLines = 2
                 )
             }
         }
 
         //Course à faire (etat = false)
-        var isVisible_CourseT by remember { mutableStateOf(true) }
+        val rotationAngle_E by animateFloatAsState(
+            targetValue = if (isRotated_E) 90f else 0f,
+            label = "rotationAnimation"
+        )
         Row(
             modifier = Modifier.padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -151,24 +163,25 @@ fun ListeEvenement() {
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 25.sp
             )
-            IconButton(onClick = { isVisible_CourseT = !isVisible_CourseT }) {
+            IconButton(onClick = { isRotated_E = !isRotated_E }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
-                    tint = Color.Gray
+                    tint = Color.Gray,
+                    modifier = Modifier.rotate(rotationAngle_E)
                 )
             }
         }
-        if (isVisible_CourseT) {
+        if (isRotated_E) {
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .padding(end = 15.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val courses = courseCrud.getAll()
+
                 var hasRow = false
-                for (course in courses) {
+                for (course in courses.value) {
                     if (!course.etat) {
                         hasRow = true
                         val nbArticles = caCrud.nbArticleCourse(course.id)
@@ -204,9 +217,11 @@ fun ListeEvenement() {
                 }
             }
         }
+        val rotationAngle_F by animateFloatAsState(
+            targetValue = if (isRotated_F) 90f else 0f,
+            label = "rotationAnimation"
+        )
 
-        //Course Terminée (etat = true)
-        var isVisible by remember { mutableStateOf(true) }
         Row(
             modifier = Modifier.padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -217,15 +232,16 @@ fun ListeEvenement() {
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 25.sp
             )
-            IconButton(onClick = { isVisible = !isVisible }) {
+            IconButton(onClick = { isRotated_F = !isRotated_F }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche),
                     contentDescription = "Galerie",
-                    tint = Color.Gray
+                    tint = Color.Gray,
+                    modifier = Modifier.rotate(rotationAngle_F)
                 )
             }
         }
-        if (isVisible) {
+        if (isRotated_F) {
             Column(
                 modifier = Modifier
                     .padding(start = 15.dp)
@@ -239,19 +255,28 @@ fun ListeEvenement() {
                         hasRow = true
                         val nbArticles = caCrud.nbArticleCourse(course.id)
                         val totalFinal = caCrud.budgetFinalAfter(course.id)
+                        var color = Color(0xFFFFA552)
+                        if (totalFinal < course.prix_initial) {
+                            color = Color(0xFF018C1B)
+                        } else if (totalFinal == course.prix_initial) {
+                            color = Color(0xFFFFCC00)
+                        }
                         Button(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth()
+                                ,
                             onClick = {
-                                val intent = Intent(context, CourseLScreen::class.java)
+                                val intent = Intent(context, CourseScreen::class.java)
                                 intent.putExtra("COURSE_ID", course.id)
                                 intent.putExtra("prix_initial", course.prix_initial)
                                 context.startActivity(intent)
                             },
                             colors = ButtonDefaults.buttonColors(
-                                Color(0xFFD9D9D9),
+                                containerColor = color,
                                 contentColor = Color.Black
-                            )
-                        ) {
+                            ),
+
+                        )
+                         {
                             Column {
                                 Text("Nom: ${course.nom}")
                                 Text("Nombre d'articles: $nbArticles")
@@ -306,7 +331,10 @@ fun ListeEvenement() {
                 }
             }
         }
-        Dialogue(showDialog2)
+        Dialogue(showDialog2) {
+
+            courses.value = courseCrud.getAll()
+        }
     }
 }
 
@@ -316,7 +344,7 @@ fun ListeEvenement() {
 
 
 @Composable
-fun Dialogue(showDialog: MutableState<Boolean>){
+fun Dialogue(showDialog: MutableState<Boolean>,CourseAdded: () -> Unit){
     val context = LocalContext.current
     var NomText by remember { mutableStateOf("") }
     var DateText by remember { mutableStateOf("") }
@@ -398,7 +426,9 @@ fun Dialogue(showDialog: MutableState<Boolean>){
                         val storage = CourseCrud(context)
                         storage.createCourse(NomText, DateText.ifEmpty { "2025-10-10" }, budgetInt)
 
+
                         showDialog.value = false
+                        CourseAdded()
                     }
                     ,
                     colors = ButtonDefaults.buttonColors(

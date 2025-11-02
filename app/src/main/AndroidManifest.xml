@@ -26,6 +26,11 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.MyMarket" />
         <activity
+            android:name=".viewmodel.CourseScreen"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MyMarket" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

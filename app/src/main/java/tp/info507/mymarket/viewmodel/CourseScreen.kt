@@ -1,26 +1,44 @@
-package td.info507.mymarket.ui
+package tp.info507.mymarket.viewmodel
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import td.info507.mymarket.crud.CourseArticleCrud
 import td.info507.mymarket.modele.Article
 import td.info507.mymarket.ui.theme.MyMarketTheme
 import tp.info507.mymarket.ListeEvenement
 import tp.info507.mymarket.MainActivity
+import tp.info507.mymarket.R
+import tp.info507.mymarket.viewmodel.Dialogue_ajout_article
+import tp.info507.mymarket.viewmodel.Test2
 
 //import td.info507.mymarket.viewmodel.CourseViewModel
 
@@ -30,202 +48,213 @@ class CourseScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val courseId = intent.getIntExtra("COURSE_ID", -1)
+        val prix_initial = intent.getIntExtra("prix_initial", -1)
         setContent {
             MyMarketTheme {
-                Hello()
+                Test(courseId, prix_initial)
             }
         }
     }
 }
+
+
 @Composable
-fun Hello() {
-    Text("TEST PAGE")
-}
+fun Test(courseId: Int, prix_initial: Int) {
+    val context = LocalContext.current
+    val crud = CourseArticleCrud(context)
+    var articles by remember { mutableStateOf(crud.getItems(courseId)) }
+    var total by remember { mutableStateOf(crud.budgetFinalAfter(courseId)) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+
+                .background(Color.White)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(top = 45.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_fleche_gauche),
+                        contentDescription = "Retour",
+                        tint = Color.Gray
+                    )
+                }
+                Text(
+                    text = "Course $courseId",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Liste des articles
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp, bottom = 200.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            ) {
+                articles.forEach { (courseArticle, name) ->
+                    var valeur by remember { mutableStateOf(courseArticle.price_final.toString()) }
+
+                    Row(
+                        modifier = Modifier.padding(end = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Case cochée
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .background(
+                                    color = if (courseArticle.checked) Color.Green else Color.Red,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (courseArticle.checked) {
+                                Text("✓", color = Color.White, textAlign = TextAlign.Center)
+                            } else {
+                                Text("X", color = Color.White, textAlign = TextAlign.Center)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = name,
+                            textDecoration = if (courseArticle.checked) TextDecoration.LineThrough else TextDecoration.None
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Zone du prix
+                        Box(
+                            modifier = Modifier
+                                .size(width = 80.dp, height = 40.dp)
+                                .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize(0.9f)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = valeur + "€",
+                                    color = Color.Black,
+                                    fontSize = 16.sp // tu peux ajuster la taille comme tu veux
+                                )
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+        Column(
+            modifier = Modifier
+
+                .fillMaxHeight()
+
+                .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
+        ) {
+
+            Column(
+                modifier = Modifier
+
+                    .background(Color.White)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Budget estimé (prix_initial)
+                    Box(
+                        modifier = Modifier
+                            .size(width = 210.dp, height = 40.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Budget estimé", color = Color.White)
+                            Box(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = prix_initial.toString(), color = Color.Black)
+                            }
+                            Text("€", color = Color.White)
+                        }
+                    }
+
+                    // Total réel (somme des PRICE_FINAL)
+                    Box(
+                        modifier = Modifier
+                            .size(width = 210.dp, height = 40.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Total réel", color = Color.White)
+                            Box(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = total.toString(), color = Color.Black)
+                            }
+                            Text("€", color = Color.White)
+                        }
+                    }
+                }
 
 
+                // Bouton "Terminer Course"
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                ) {
+                    Text("Quitter Course", color = Color.White)
+                }
+            }
+        }
 
+    }
 
-//@Composable
-//fun CourseScreen(viewModel: CourseViewModel) {
-//    val course = viewModel.course.value ?: run {
-//        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Aucune course") }
-//        return
-//    }
-//    val articles = viewModel.articles
-//
-//    var showAddDialog by remember { mutableStateOf(false) }
-//    var editIndex by remember { mutableStateOf<Int?>(null) }
-//    var showConfirmFinish by remember { mutableStateOf(false) }
-//
-//    Column(
-//        Modifier
-//            .fillMaxSize()
-//            .padding(16.dp)
-//    ) {
-//        Text(text = course.nom, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-//        Text("${course.date} • ${course.lieu}", color = Color.Gray)
-//
-//        Spacer(Modifier.height(12.dp))
-//
-//        LazyColumn(Modifier.weight(1f)) {
-//            itemsIndexed(articles) { index, a ->
-//                ArticleRow(
-//                    article = a,
-//                    enabled = !course.etat,
-//                    onToggle = { viewModel.toggle(index) },
-//                    onPriceClick = { editIndex = index }
-//                )
-//                Spacer(Modifier.height(8.dp))
-//            }
-//        }
-//
-//        Spacer(Modifier.height(8.dp))
-//
-//        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-//            if (!course.etat) {
-//                FilledTonalButton(
-//                    onClick = { showAddDialog = true },
-//                    shape = MaterialTheme.shapes.large,
-//                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-//                ) { Text("+") }
-//            }
-//        }
-//
-//        Spacer(Modifier.height(12.dp))
-//
-//        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-//            AssistChip(label = { Text("Budget final : ${viewModel.budgetFinal()}$") }, onClick = {})
-//        }
-//
-//        Spacer(Modifier.height(12.dp))
-//
-//        if (!course.etat) {
-//            Button(
-//                onClick = { showConfirmFinish = true },
-//                modifier = Modifier.fillMaxWidth()
-//            ) { Text("Terminer la course") }
-//        } else {
-//            TextButton(
-//                onClick = { viewModel.reopen() },
-//                modifier = Modifier.fillMaxWidth()
-//            ) { Text("Reprendre la course") }
-//        }
-//    }
-//
-//    if (showAddDialog) {
-//        AddArticleDialog(
-//            onDismiss = { showAddDialog = false },
-//            onConfirm = { name, priceEstime ->
-//                viewModel.addArticle(name, priceEstime)
-//                showAddDialog = false
-//            }
-//        )
-//    }
-//
-//    editIndex?.let { idx ->
-//        EditPriceDialog(
-//            initial = articles[idx].price_final,
-//            onDismiss = { editIndex = null },
-//            onConfirm = { newPrice ->
-//                viewModel.setFinalPrice(idx, newPrice)
-//                editIndex = null
-//            }
-//        )
-//    }
-//
-//    if (showConfirmFinish) {
-//        AlertDialog(
-//            onDismissRequest = { showConfirmFinish = false },
-//            confirmButton = {
-//                TextButton(onClick = {
-//                    viewModel.finish()
-//                    showConfirmFinish = false
-//                }) { Text("Oui, terminer") }
-//            },
-//            dismissButton = { TextButton(onClick = { showConfirmFinish = false }) { Text("Annuler") } },
-//            title = { Text("Terminer la course") },
-//            text = { Text("Êtes-vous sûr de vouloir terminer la course ?") }
-//        )
-//    }
-//}
-//
-//@Composable
-//private fun ArticleRow(
-//    article: Article,
-//    enabled: Boolean,
-//    onToggle: () -> Unit,
-//    onPriceClick: () -> Unit
-//) {
-//    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-//        Checkbox(
-//            checked = article.checked,
-//            onCheckedChange = { if (enabled) onToggle() },
-//            enabled = enabled,
-//            colors = CheckboxDefaults.colors()
-//        )
-//
-//        Text(article.name, Modifier.weight(1f))
-//
-//        TextButton(onClick = { if (enabled) onPriceClick() }, enabled = enabled) {
-//            Text("${article.price_final}$")
-//        }
-//    }
-//}
-//
-//@Composable
-//private fun AddArticleDialog(
-//    onDismiss: () -> Unit,
-//    onConfirm: (name: String, priceEstime: Int) -> Unit
-//) {
-//    var name by remember { mutableStateOf("") }
-//    var price by remember { mutableStateOf("") }
-//
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        confirmButton = {
-//            TextButton(onClick = {
-//                if (name.isNotBlank() && price.isNotBlank()) {
-//                    onConfirm(name.trim(), price.toIntOrNull() ?: 0)
-//                }
-//            }) { Text("Ajouter") }
-//        },
-//        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
-//        title = { Text("Nouvel article") },
-//        text = {
-//            Column {
-//                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nom") })
-//                Spacer(Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = price,
-//                    onValueChange = { s -> price = s.filter { it.isDigit() } },
-//                    label = { Text("Prix estimé (entier)") }
-//                )
-//            }
-//        }
-//    )
-//}
-//
-//@Composable
-//private fun EditPriceDialog(
-//    initial: Int,
-//    onDismiss: () -> Unit,
-//    onConfirm: (newPrice: Int) -> Unit
-//) {
-//    var price by remember { mutableStateOf(initial.toString()) }
-//
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        confirmButton = {
-//            TextButton(onClick = { onConfirm(price.toIntOrNull() ?: 0) }) { Text("Enregistrer") }
-//        },
-//        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
-//        title = { Text("Modifier le prix") },
-//        text = {
-//            OutlinedTextField(
-//                value = price,
-//                onValueChange = { s -> price = s.filter { it.isDigit() } },
-//                label = { Text("Prix final (entier)") }
-//            )
-//        }
-//    )
-//}

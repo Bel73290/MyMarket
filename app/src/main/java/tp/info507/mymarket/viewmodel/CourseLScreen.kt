@@ -21,10 +21,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -69,7 +72,6 @@ class CourseLScreen : ComponentActivity() {
         enableEdgeToEdge()
         val courseId = intent.getIntExtra("COURSE_ID", -1)
         val prix_initial = intent.getIntExtra("prix_initial", -1)
-        prix_initial
         setContent {
             MyMarketTheme {
                 Test2(courseId,prix_initial)
@@ -84,7 +86,7 @@ fun Test2(courseId: Int, prix_initial: Int) {
     var articles by remember { mutableStateOf(crud.getItems(courseId)) }
     var total by remember { mutableStateOf(crud.budgetFinalAfter(courseId)) }
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         // En-tête avec flèche de retour et titre
         Row(
             modifier = Modifier.padding(top = 45.dp),
@@ -109,14 +111,17 @@ fun Test2(courseId: Int, prix_initial: Int) {
 
         // Liste des articles
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp, bottom=200.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+
         ) {
             articles.forEach { (courseArticle, name) ->
                 var valeur by remember { mutableStateOf(courseArticle.price_final.toString()) }
 
                 Row(
-                    modifier = Modifier.padding(start = 18.dp),
+                    modifier = Modifier.padding(end=20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Case cochée
@@ -163,11 +168,15 @@ fun Test2(courseId: Int, prix_initial: Int) {
                             contentAlignment = Alignment.Center
                         ) {
                             BasicTextField(
-                                value = valeur,
+                                value = valeur ,
                                 onValueChange = { newValue ->
                                     if (newValue.all { it.isDigit() }) {
                                         valeur = newValue
-                                        crud.setFinalPrice(courseId, courseArticle.articleId, newValue.toIntOrNull() ?: 0)
+                                        crud.setFinalPrice(
+                                            courseId,
+                                            courseArticle.articleId,
+                                            newValue.toIntOrNull() ?: 0
+                                        )
                                         total = crud.budgetFinalAfter(courseId)
                                     }
                                 },
@@ -179,115 +188,124 @@ fun Test2(courseId: Int, prix_initial: Int) {
                 }
             }
         }
+    }
 
         // Pied de page avec ajout d’article et total
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
+
+                .fillMaxHeight()
+
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
         ) {
             val showDialogArticle = remember { mutableStateOf(false) }
 
             // Bouton +
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = { showDialogArticle.value = true }) {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_add_circle_24),
-                        contentDescription = "add",
-                        tint = Color(0xFFD9D9D9),
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                Dialogue_ajout_article(showDialogArticle, courseId) {
-                    articles = crud.getItems(courseId)
-                    total = crud.budgetFinalAfter(courseId)
-                }
-            }
+            Column (modifier = Modifier
 
-            // Affichage des budgets : estimé (prix_initial) + total réel (somme des PRICE_FINAL)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 6.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Budget estimé (prix_initial)
-                Box(
-                    modifier = Modifier
-                        .size(width = 210.dp, height = 40.dp)
-                        .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
-                    contentAlignment = Alignment.CenterStart
+                .background(Color.White)
+                .fillMaxWidth() ){
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Budget estimé", color = Color.White)
-                        Box(
-                            modifier = Modifier
-                                .width(60.dp)
-                                .background(Color.White, shape = RoundedCornerShape(25.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = prix_initial.toString(), color = Color.Black)
-                        }
-                        Text("€", color = Color.White)
+                    IconButton(onClick = { showDialogArticle.value = true }) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_add_circle_24),
+                            contentDescription = "add",
+                            tint = Color(0xFFD9D9D9),
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Dialogue_ajout_article(showDialogArticle, courseId) {
+                        articles = crud.getItems(courseId)
+                        total = crud.budgetFinalAfter(courseId)
                     }
                 }
 
-                // Total réel (somme des PRICE_FINAL)
-                Box(
+                // Affichage des budgets : estimé (prix_initial) + total réel (somme des PRICE_FINAL)
+                Row(
                     modifier = Modifier
-                        .size(width = 210.dp, height = 40.dp)
-                        .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
-                    contentAlignment = Alignment.CenterStart
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
+                    // Budget estimé (prix_initial)
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .size(width = 210.dp, height = 40.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        Text("Total réel", color = Color.White)
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .width(60.dp)
-                                .background(Color.White, shape = RoundedCornerShape(25.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                            contentAlignment = Alignment.Center
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = total.toString(), color = Color.Black)
+                            Text("Budget estimé", color = Color.White)
+                            Box(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = prix_initial.toString(), color = Color.Black)
+                            }
+                            Text("€", color = Color.White)
                         }
-                        Text("€", color = Color.White)
+                    }
+
+                    // Total réel (somme des PRICE_FINAL)
+                    Box(
+                        modifier = Modifier
+                            .size(width = 210.dp, height = 40.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Total réel", color = Color.White)
+                            Box(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = total.toString(), color = Color.Black)
+                            }
+                            Text("€", color = Color.White)
+                        }
                     }
                 }
-            }
 
 
-            // Bouton "Terminer Course"
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    crud.finishCourse(courseId)
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-            ) {
-                Text("Terminer Course", color = Color.White)
+                // Bouton "Terminer Course"
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        crud.finishCourse(courseId)
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                ) {
+                    Text("Terminer Course", color = Color.White)
+                }
             }
         }
-    }
+
 }
 
 
@@ -337,11 +355,3 @@ fun Dialogue_ajout_article(showDialog: MutableState<Boolean>, courseId: Int, Art
 
 
 
-@Preview(showBackground = true)
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyMarketTheme {
-        Test2(courseId = 1,150)
-    }
-}
