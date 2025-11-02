@@ -53,6 +53,26 @@ class CourseCrud(context: Context) {
         return rows
     }
 
+    fun getById(id: Int): Course? {
+        val db = dbh.readableDatabase
+        var result: Course? = null
+        db.query(
+            Course.TABLE, null,
+            "${Course.ID}=?", arrayOf(id.toString()), null, null, null
+        ).use { c ->
+            if (c.moveToFirst()) {
+                result = Course(
+                    id = c.getInt(c.getColumnIndexOrThrow(Course.ID)),
+                    nom = c.getString(c.getColumnIndexOrThrow(Course.NOM)),
+                    date = c.getString(c.getColumnIndexOrThrow(Course.DATE)),
+                    prix_initial = c.getInt(c.getColumnIndexOrThrow(Course.PRIX_INITIAL)),
+                    etat = c.getInt(c.getColumnIndexOrThrow(Course.ETAT)) == 1
+                )
+            }
+        }
+        return result
+    }
+
     fun getAll(): List<Course> {
         val db = dbh.readableDatabase
         val out = mutableListOf<Course>()
