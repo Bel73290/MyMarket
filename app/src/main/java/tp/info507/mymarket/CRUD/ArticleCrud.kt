@@ -30,25 +30,4 @@ class ArticleCrud(context: Context) {
         }
         return res
     }
-
-    fun getById(id: Int): Article? {
-        var res: Article? = null
-        dbh.readableDatabase.query(
-            Article.TABLE, null,
-            "${Article.ID}=?", arrayOf(id.toString()), null, null, null
-        ).use { c ->
-            if (c.moveToFirst()) {
-                res = Article(
-                    id = c.getInt(c.getColumnIndexOrThrow(Article.ID)),
-                    name = c.getString(c.getColumnIndexOrThrow(Article.NAME))
-                )
-            }
-        }
-        return res
-    }
-
-    fun delete(id: Int): Int {
-        val res = dbh.writableDatabase.delete(Article.TABLE, "${Article.ID}=?", arrayOf(id.toString()))
-        return res
-    }
 }

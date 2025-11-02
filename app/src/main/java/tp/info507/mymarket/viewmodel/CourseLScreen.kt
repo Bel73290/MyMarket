@@ -185,6 +185,31 @@ fun Test2(courseId: Int, prix_initial: Int) {
                             )
                         }
                     }
+
+                    //Poubelle supprimer
+                    Box(
+                        modifier = Modifier
+                            .size(width = 80.dp, height = 40.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        IconButton(
+                            onClick = {
+                                crud.removeItem(courseId, courseArticle.articleId)
+                                articles = crud.getItems(courseId)
+                                total = crud.budgetFinalAfter(courseId)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .size(26.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_close),
+                                contentDescription = "Supprimer l’article",
+                                tint = Color.Red
+                            )
+                        }
+                    }
+
                 }
             }
         }
