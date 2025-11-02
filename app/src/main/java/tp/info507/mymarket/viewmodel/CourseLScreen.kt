@@ -52,10 +52,12 @@ import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import td.info507.mymarket.crud.ArticleCrud
 import td.info507.mymarket.crud.CourseArticleCrud
 import td.info507.mymarket.crud.CourseCrud
@@ -74,15 +76,16 @@ class CourseLScreen : ComponentActivity() {
         val prix_initial = intent.getIntExtra("prix_initial", -1)
         setContent {
             MyMarketTheme {
-                Test2(courseId,prix_initial)
+                CourseEnCours(courseId,prix_initial)
             }
         }
     }
 }
 @Composable
-fun Test2(courseId: Int, prix_initial: Int) {
+fun CourseEnCours(courseId: Int, prix_initial: Int) {
     val context = LocalContext.current
     val crud = CourseArticleCrud(context)
+    val cours = CourseCrud(context)
     var articles by remember { mutableStateOf(crud.getItems(courseId)) }
     var total by remember { mutableStateOf(crud.budgetFinalAfter(courseId)) }
 
@@ -99,14 +102,22 @@ fun Test2(courseId: Int, prix_initial: Int) {
                 Icon(
                     painter = painterResource(R.drawable.ic_fleche_gauche),
                     contentDescription = "Retour",
-                    tint = Color.Gray
+                    tint = Color.Gray,
+
                 )
             }
-            Text(
-                text = "Course $courseId",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Nom : " + (cours.getById(courseId)?.nom ?: "inconnue"),
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Date : " + (cours.getById(courseId)?.date ?: "non précisée"),
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp
+                )
+            }
         }
 
         // Liste des articles
@@ -114,6 +125,7 @@ fun Test2(courseId: Int, prix_initial: Int) {
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp, bottom=200.dp),
+
             verticalArrangement = Arrangement.spacedBy(8.dp)
 
         ) {
@@ -217,6 +229,7 @@ fun Test2(courseId: Int, prix_initial: Int) {
                             contentDescription = "add",
                             tint = Color(0xFFD9D9D9),
                             modifier = Modifier.size(40.dp)
+                                .background(Color.Black)
                         )
                     }
                     Dialogue_ajout_article(showDialogArticle, courseId) {
@@ -236,56 +249,67 @@ fun Test2(courseId: Int, prix_initial: Int) {
                     // Budget estimé (prix_initial)
                     Box(
                         modifier = Modifier
-                            .size(width = 210.dp, height = 40.dp)
-                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                            .size(width = 151.dp, height = 56.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(15.dp)),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Row(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp),
+
+                                .padding(start = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Budget estimé", color = Color.White)
+                            Text(
+                                text = "Budget\nestimé",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
                             Box(
                                 modifier = Modifier
+                                    .padding(start=15.dp)
                                     .width(60.dp)
-                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .background(Color.White, shape = RoundedCornerShape(15.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = prix_initial.toString(), color = Color.Black)
+                                Text(text = prix_initial.toString()+"€", color = Color.Black)
                             }
-                            Text("€", color = Color.White)
                         }
                     }
 
                     // Total réel (somme des PRICE_FINAL)
                     Box(
                         modifier = Modifier
-                            .size(width = 210.dp, height = 40.dp)
-                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
+                            .size(width = 151.dp, height = 56.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(15.dp)),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Row(
                             modifier = Modifier
-                                .fillMaxSize()
+
                                 .padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Total réel", color = Color.White)
+                            Text(
+                                text = "Budget\nréel",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
                             Box(
                                 modifier = Modifier
+                                    .padding(start=15.dp)
                                     .width(60.dp)
-                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .background(Color.White, shape = RoundedCornerShape(15.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = total.toString(), color = Color.Black)
+                                Text(text = total.toString()+"€", color = Color.Black)
                             }
-                            Text("€", color = Color.White)
+
                         }
                     }
                 }
