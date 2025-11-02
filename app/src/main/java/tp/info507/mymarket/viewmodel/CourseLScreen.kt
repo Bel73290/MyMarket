@@ -2,7 +2,6 @@ package tp.info507.mymarket.viewmodel
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,16 +16,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -35,8 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -46,27 +40,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter.Companion.tint
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import td.info507.mymarket.crud.ArticleCrud
 import td.info507.mymarket.crud.CourseArticleCrud
 import td.info507.mymarket.crud.CourseCrud
 import td.info507.mymarket.ui.theme.MyMarketTheme
-import tp.info507.mymarket.Dialogue
-import tp.info507.mymarket.ListeEvenement
 import tp.info507.mymarket.MainActivity
 import tp.info507.mymarket.R
-import kotlin.text.ifEmpty
+
 
 class CourseLScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +77,8 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
     val cours = CourseCrud(context)
     var articles by remember { mutableStateOf(crud.getItems(courseId)) }
     var total by remember { mutableStateOf(crud.budgetFinalAfter(courseId)) }
+    val showAlert = remember { mutableStateOf(false) }
+    var nbChecked by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // En-tête avec flèche de retour et titre
@@ -110,11 +101,13 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                 Text(
                     text = "Nom : " + (cours.getById(courseId)?.nom ?: "inconnue"),
                     textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Date : " + (cours.getById(courseId)?.date ?: "non précisée"),
                     textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
             }
@@ -153,13 +146,13 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                         contentAlignment = Alignment.Center
                     ) {
                         if (courseArticle.checked) {
-                            Text("✓", color = Color.White, textAlign = TextAlign.Center)
+                            Text("✓", color = Color.White, textAlign = TextAlign.Center,fontWeight = FontWeight.Bold)
                         }
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = name,
+                        text = name,fontWeight = FontWeight.Bold,
                         textDecoration = if (courseArticle.checked) TextDecoration.LineThrough else TextDecoration.None
                     )
 
@@ -193,7 +186,8 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                                     }
                                 },
                                 singleLine = true,
-                                textStyle = TextStyle(color = Color.Black)
+                                textStyle = TextStyle(color = Color.Black,fontWeight = FontWeight.Bold),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
                         }
                     }
@@ -206,18 +200,16 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
 
         Column(
             modifier = Modifier
-
                 .fillMaxHeight()
-
                 .padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
+            verticalArrangement = Arrangement.Bottom,
         ) {
             val showDialogArticle = remember { mutableStateOf(false) }
 
             // Bouton +
             Column (modifier = Modifier
-
                 .background(Color.White)
+                .padding(5.dp)
                 .fillMaxWidth() ){
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -319,14 +311,31 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        crud.finishCourse(courseId)
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
+                        val nonCheckedArticles = articles.count { !it.first.checked }
+                        if (nonCheckedArticles == 0) {
+                            crud.finishCourse(courseId)
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
+
+                        } else {
+                            nbChecked = nonCheckedArticles
+                            showAlert.value = true
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                 ) {
                     Text("Terminer Course", color = Color.White)
                 }
+
+                AlertTerminerCourse(
+                    showDialog = showAlert,
+                    nbChecked = nbChecked,
+                    onConfirm = {
+                        crud.finishCourse(courseId)
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                )
             }
         }
 
@@ -371,6 +380,52 @@ fun Dialogue_ajout_article(showDialog: MutableState<Boolean>, courseId: Int, Art
                     showDialog.value = false
                 }) {
                     Text("Valider")
+                }
+            }
+        )
+    }
+}
+
+
+
+@Composable
+fun AlertTerminerCourse(
+    showDialog: MutableState<Boolean>,
+    nbChecked: Int,
+    onConfirm: () -> Unit
+) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Attention ⚠") },
+            text = {
+                Text("Êtes vous sur d’avoir terminer vos course ?\nIl vous reste $nbChecked articles non validé.",fontWeight = FontWeight.Bold)
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("NON",fontWeight = FontWeight.Bold)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        onConfirm()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Text("OUI",fontWeight = FontWeight.Bold)
                 }
             }
         )

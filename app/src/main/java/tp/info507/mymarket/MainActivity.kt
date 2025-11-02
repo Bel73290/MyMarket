@@ -9,6 +9,7 @@ import android.os.VibratorManager
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -58,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -392,9 +395,16 @@ fun Dialogue(showDialog: MutableState<Boolean>,CourseAdded: () -> Unit){
                     }
                     OutlinedTextField(
                         value = BudgetText,
-                        onValueChange = { BudgetText = it },
-                        label = { Text("Bugdget") }
+                        onValueChange = { newValue ->
+                            // Autorise uniquement les chiffres (0-9)
+                            if (newValue.all { it.isDigit() }) {
+                                BudgetText = newValue
+                            }
+                        },
+                        label = { Text("Budget") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
+
 
 
                 }
@@ -425,7 +435,7 @@ fun Dialogue(showDialog: MutableState<Boolean>,CourseAdded: () -> Unit){
                         val budgetInt: Int = BudgetText.toIntOrNull() ?: 0
                         val storage = CourseCrud(context)
                         storage.createCourse(NomText, DateText.ifEmpty { "2025-10-10" }, budgetInt)
-
+                        Toast.makeText(context, "Course ajoutée avec succès !", Toast.LENGTH_SHORT).show()
 
                         showDialog.value = false
                         CourseAdded()
@@ -435,6 +445,7 @@ fun Dialogue(showDialog: MutableState<Boolean>,CourseAdded: () -> Unit){
                         Color(0xFF000000),
                         contentColor = Color.White
                     )
+
                 ) {
                     Text("Valider")
                 }
