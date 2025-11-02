@@ -130,7 +130,7 @@ fun ListeEvenement() {
             Box(
                 modifier = Modifier
                     .padding(start = 20.dp)
-                    .height(50.dp)
+                    .height(70.dp)
                     .fillMaxWidth(0.90f)
                     .border(
                         width = 2.dp,

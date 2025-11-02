@@ -158,61 +158,67 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    // Zone du prix
-                    Box(
-                        modifier = Modifier
-                            .size(width = 80.dp, height = 40.dp)
-                            .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp) // espace entre les 2
                     ) {
+                        // Zone du prix
                         Box(
                             modifier = Modifier
-                                .fillMaxSize(0.9f)
-                                .background(Color.White, shape = RoundedCornerShape(25.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                .size(width = 80.dp, height = 40.dp)
+                                .background(Color.Gray, shape = RoundedCornerShape(25.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            BasicTextField(
-                                value = valeur ,
-                                onValueChange = { newValue ->
-                                    if (newValue.all { it.isDigit() }) {
-                                        valeur = newValue
-                                        crud.setFinalPrice(
-                                            courseId,
-                                            courseArticle.articleId,
-                                            newValue.toIntOrNull() ?: 0
-                                        )
-                                        total = crud.budgetFinalAfter(courseId)
-                                    }
-                                },
-                                singleLine = true,
-                                textStyle = TextStyle(color = Color.Black,fontWeight = FontWeight.Bold),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize(0.9f)
+                                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                BasicTextField(
+                                    value = valeur,
+                                    onValueChange = { newValue ->
+                                        if (newValue.all { it.isDigit() }) {
+                                            valeur = newValue
+                                            crud.setFinalPrice(
+                                                courseId,
+                                                courseArticle.articleId,
+                                                newValue.toIntOrNull() ?: 0
+                                            )
+                                            total = crud.budgetFinalAfter(courseId)
+                                        }
+                                    },
+                                    singleLine = true,
+                                    textStyle = TextStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                )
+                            }
                         }
-                    }
 
-                    //Poubelle supprimer
-                    Box(
-                        modifier = Modifier
-                            .size(width = 80.dp, height = 40.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        IconButton(
-                            onClick = {
-                                crud.removeItem(courseId, courseArticle.articleId)
-                                articles = crud.getItems(courseId)
-                                total = crud.budgetFinalAfter(courseId)
-                            },
+                        //Poubelle supprimer
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(26.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Supprimer l’article",
-                                tint = Color.Red
-                            )
+                            IconButton(
+                                onClick = {
+                                    crud.removeItem(courseId, courseArticle.articleId)
+                                    articles = crud.getItems(courseId)
+                                    total = crud.budgetFinalAfter(courseId)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .size(26.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_close),
+                                    contentDescription = "Supprimer l’article",
+                                    tint = Color.Red
+                                )
+                            }
                         }
                     }
 
