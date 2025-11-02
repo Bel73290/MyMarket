@@ -2,6 +2,7 @@ package tp.info507.mymarket.viewmodel
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -101,13 +101,11 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                 Text(
                     text = "Nom : " + (cours.getById(courseId)?.nom ?: "inconnue"),
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Date : " + (cours.getById(courseId)?.date ?: "non précisée"),
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
             }
@@ -146,13 +144,13 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                         contentAlignment = Alignment.Center
                     ) {
                         if (courseArticle.checked) {
-                            Text("✓", color = Color.White, textAlign = TextAlign.Center,fontWeight = FontWeight.Bold)
+                            Text("✓", color = Color.White, textAlign = TextAlign.Center)
                         }
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = name,fontWeight = FontWeight.Bold,
+                        text = name,
                         textDecoration = if (courseArticle.checked) TextDecoration.LineThrough else TextDecoration.None
                     )
 
@@ -160,7 +158,7 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp) // espace entre les 2
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Zone du prix
                         Box(
@@ -192,7 +190,6 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                                     singleLine = true,
                                     textStyle = TextStyle(
                                         color = Color.Black,
-                                        fontWeight = FontWeight.Bold
                                     ),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
@@ -252,7 +249,7 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                             contentDescription = "add",
                             tint = Color(0xFFD9D9D9),
                             modifier = Modifier.size(40.dp)
-                                .background(Color.Black)
+
                         )
                     }
                     Dialogue_ajout_article(showDialogArticle, courseId) {
@@ -286,7 +283,6 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                             Text(
                                 text = "Budget\nestimé",
                                 color = Color.Black,
-                                fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                             Box(
@@ -319,7 +315,6 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                             Text(
                                 text = "Budget\nréel",
                                 color = Color.Black,
-                                fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                             Box(
@@ -342,15 +337,18 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        val nonCheckedArticles = articles.count { !it.first.checked }
-                        if (nonCheckedArticles == 0) {
-                            crud.finishCourse(courseId)
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
-
+                        if (articles.isEmpty()) {
+                            Toast.makeText(context, "Vous ne pouvez pas terminer une course sans articles", Toast.LENGTH_SHORT).show()
                         } else {
-                            nbChecked = nonCheckedArticles
-                            showAlert.value = true
+                            val nonCheckedArticles = articles.count { !it.first.checked }
+                            if (nonCheckedArticles == 0) {
+                                crud.finishCourse(courseId)
+                                val intent = Intent(context, MainActivity::class.java)
+                                context.startActivity(intent)
+                            } else {
+                                nbChecked = nonCheckedArticles
+                                showAlert.value = true
+                            }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
@@ -367,6 +365,7 @@ fun CourseEnCours(courseId: Int, prix_initial: Int) {
                         context.startActivity(intent)
                     }
                 )
+
             }
         }
 
@@ -430,7 +429,7 @@ fun AlertTerminerCourse(
             onDismissRequest = { showDialog.value = false },
             title = { Text("Attention ⚠") },
             text = {
-                Text("Êtes vous sur d’avoir terminer vos course ?\nIl vous reste $nbChecked articles non validé.",fontWeight = FontWeight.Bold)
+                Text("Êtes vous sur d’avoir terminer vos course ?\nIl vous reste $nbChecked articles non validé.")
             },
             dismissButton = {
                 Button(
@@ -441,7 +440,7 @@ fun AlertTerminerCourse(
                     ),
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    Text("NON",fontWeight = FontWeight.Bold)
+                    Text("NON")
                 }
             },
             confirmButton = {
@@ -456,7 +455,7 @@ fun AlertTerminerCourse(
                     ),
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
-                    Text("OUI",fontWeight = FontWeight.Bold)
+                    Text("OUI")
                 }
             }
         )
